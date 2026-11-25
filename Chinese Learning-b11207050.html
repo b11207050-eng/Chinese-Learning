@@ -1,0 +1,2028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FormosaLingo AI | 台灣華語遊戲化學習系統</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Nunito (Duolingo-like rounded font), Inter, Noto Sans TC & JP -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=Noto+Sans+JP:wght@500;700;900&family=Noto+Sans+TC:wght@500;700;900&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Nunito', 'Inter', 'Noto Sans JP', 'sans-serif'],
+                        tc: ['Noto Sans TC', 'sans-serif'],
+                    },
+                    colors: {
+                        duoGreen: {
+                            DEFAULT: '#58CC02',
+                            dark: '#46A302',
+                            light: '#D7FFB8',
+                            border: '#58A700'
+                        },
+                        duoBlue: {
+                            DEFAULT: '#1CB0F6',
+                            dark: '#1899D6',
+                            light: '#DDF4FF'
+                        },
+                        duoOrange: {
+                            DEFAULT: '#FF9600',
+                            dark: '#E58600',
+                            light: '#FFF4E5'
+                        },
+                        duoRed: {
+                            DEFAULT: '#FF4B4B',
+                            dark: '#EA2B2B',
+                            light: '#FFDFE0'
+                        },
+                        duoPurple: {
+                            DEFAULT: '#CE82FF',
+                            dark: '#A568CC',
+                            light: '#F3E5FF'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Duolingo 3D Tactile Button Styles */
+        .btn-3d {
+            transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s ease;
+        }
+        .btn-3d:active:not(:disabled) {
+            transform: translateY(4px);
+            border-bottom-width: 0px !important;
+            margin-top: 4px;
+        }
+        /* Bounce animation for Mascot & Active Node */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-float {
+            animation: floatSlow 2.8s ease-in-out infinite;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.85); opacity: 0; }
+            70% { transform: scale(1.04); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 999px;
+        }
+    </style>
+</head>
+<body class="bg-white text-slate-800 antialiased min-h-screen flex flex-col md:flex-row selection:bg-duoGreen-light selection:text-duoGreen-dark">
+
+    <!-- ===================================================================== -->
+    <!-- 1. ONBOARDING WELCOME MODAL (First-time / Language & Goal Setup)      -->
+    <!-- ===================================================================== -->
+    <div id="onboarding-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border-2 border-slate-200 animate-pop text-center">
+            <!-- Taiwan Black Bear Mascot SVG -->
+            <div class="w-24 h-24 mx-auto mb-4 animate-float">
+                <svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-md">
+                    <!-- Ears -->
+                    <circle cx="28" cy="30" r="16" fill="#27272a"/>
+                    <circle cx="28" cy="30" r="8" fill="#52525b"/>
+                    <circle cx="92" cy="30" r="16" fill="#27272a"/>
+                    <circle cx="92" cy="30" r="8" fill="#52525b"/>
+                    <!-- Head -->
+                    <ellipse cx="60" cy="64" rx="44" ry="40" fill="#27272a"/>
+                    <!-- Muzzle -->
+                    <ellipse cx="60" cy="74" rx="18" ry="14" fill="#fef3c7"/>
+                    <!-- Eyes -->
+                    <circle cx="43" cy="56" r="5.5" fill="#ffffff"/>
+                    <circle cx="44" cy="56" r="3" fill="#09090b"/>
+                    <circle cx="77" cy="56" r="5.5" fill="#ffffff"/>
+                    <circle cx="76" cy="56" r="3" fill="#09090b"/>
+                    <!-- Cheeks -->
+                    <ellipse cx="34" cy="67" rx="6" ry="3.5" fill="#fda4af" opacity="0.8"/>
+                    <ellipse cx="86" cy="67" rx="6" ry="3.5" fill="#fda4af" opacity="0.8"/>
+                    <!-- Nose & Smile -->
+                    <ellipse cx="60" cy="68" rx="5" ry="3.5" fill="#18181b"/>
+                    <path d="M 53 76 Q 60 83 67 76" stroke="#18181b" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    <!-- Formosan V-mark Collar -->
+                    <path d="M 38 98 L 60 112 L 82 98" stroke="#ffffff" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+
+            <span class="inline-block px-3 py-1 rounded-full bg-duoGreen-light text-duoGreen-dark font-extrabold text-xs tracking-wide uppercase mb-2">
+                FormosaLingo AI • 台灣華語
+            </span>
+            <h2 id="ob-title" class="text-2xl sm:text-3xl font-black text-slate-900 mb-2">
+                Learn Taiwan Mandarin the Fun Way!
+            </h2>
+            <p id="ob-subtitle" class="text-sm text-slate-500 mb-6">
+                Zero experience needed. Choose your native language to begin:
+            </p>
+
+            <!-- Language Cards -->
+            <div class="grid grid-cols-3 gap-3 mb-6">
+                <button onclick="selectOnboardingLang('en')" id="ob-lang-en" class="ob-lang-card p-3 rounded-2xl border-2 border-duoBlue bg-duoBlue-light/50 flex flex-col items-center gap-1.5 transition-all">
+                    <span class="text-2xl">🇺🇸</span>
+                    <span class="font-extrabold text-xs sm:text-sm text-slate-800">English</span>
+                </button>
+                <button onclick="selectOnboardingLang('vi')" id="ob-lang-vi" class="ob-lang-card p-3 rounded-2xl border-2 border-slate-200 hover:border-duoBlue flex flex-col items-center gap-1.5 transition-all">
+                    <span class="text-2xl">🇻🇳</span>
+                    <span class="font-extrabold text-xs sm:text-sm text-slate-800">Tiếng Việt</span>
+                </button>
+                <button onclick="selectOnboardingLang('ja')" id="ob-lang-ja" class="ob-lang-card p-3 rounded-2xl border-2 border-slate-200 hover:border-duoBlue flex flex-col items-center gap-1.5 transition-all">
+                    <span class="text-2xl">🇯🇵</span>
+                    <span class="font-extrabold text-xs sm:text-sm text-slate-800">日本語</span>
+                </button>
+            </div>
+
+            <!-- Daily Goal Selector -->
+            <div class="text-left mb-6">
+                <label id="ob-goal-label" class="block text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-2">
+                    Daily Learning Goal
+                </label>
+                <div class="grid grid-cols-2 gap-2.5">
+                    <button onclick="selectDailyGoal(30)" id="ob-goal-30" class="ob-goal-btn p-3 rounded-2xl border-2 border-duoGreen bg-duoGreen-light/40 flex items-center justify-between text-xs font-extrabold text-slate-800">
+                        <span id="ob-goal-casual">Casual • 5 min</span>
+                        <span class="text-duoGreen-dark">30 XP</span>
+                    </button>
+                    <button onclick="selectDailyGoal(60)" id="ob-goal-60" class="ob-goal-btn p-3 rounded-2xl border-2 border-slate-200 flex items-center justify-between text-xs font-extrabold text-slate-700">
+                        <span id="ob-goal-serious">Serious • 15 min</span>
+                        <span class="text-duoOrange">60 XP</span>
+                    </button>
+                </div>
+            </div>
+
+            <button onclick="closeOnboarding()" id="ob-start-btn" class="btn-3d w-full py-4 rounded-2xl bg-duoGreen border-b-4 border-duoGreen-dark text-white font-black text-base tracking-wide uppercase shadow-md hover:brightness-105">
+                Start Learning Now!
+            </button>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- 2. LEFT SIDEBAR (Desktop) / BOTTOM NAV (Mobile)                       -->
+    <!-- ===================================================================== -->
+    <aside id="main-sidebar" class="fixed bottom-0 left-0 right-0 md:static md:w-64 lg:w-72 bg-white border-t-2 md:border-t-0 md:border-r-2 border-slate-200 z-30 flex md:flex-col justify-between p-2 md:p-5 shrink-0">
+        <div>
+            <!-- Brand Header (Desktop) -->
+            <div class="hidden md:flex items-center gap-3 px-2 mb-8 mt-1">
+                <div class="w-11 h-11 rounded-2xl bg-duoGreen border-b-4 border-duoGreen-dark text-white flex items-center justify-center font-tc font-black text-2xl shadow-sm">
+                    台
+                </div>
+                <div>
+                    <div class="font-black text-xl text-duoGreen tracking-tight leading-none">FormosaLingo</div>
+                    <div class="text-[11px] font-extrabold text-slate-400 mt-1">繁體中文＋漢語拼音</div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex md:flex-col justify-around md:justify-start gap-1 md:gap-2.5 w-full">
+                <button onclick="switchMainView('learn')" id="nav-learn" class="side-nav-btn flex flex-col md:flex-row items-center gap-1 md:gap-3.5 px-3 py-2 md:px-4 md:py-3.5 rounded-2xl border-2 font-extrabold text-xs md:text-sm transition-all">
+                    <i class="fa-solid fa-map-location-dot text-lg md:text-xl text-duoGreen"></i>
+                    <span id="nav-label-learn">Learn</span>
+                </button>
+                <button onclick="switchMainView('pinyin')" id="nav-pinyin" class="side-nav-btn flex flex-col md:flex-row items-center gap-1 md:gap-3.5 px-3 py-2 md:px-4 md:py-3.5 rounded-2xl border-2 font-extrabold text-xs md:text-sm transition-all">
+                    <i class="fa-solid fa-wave-square text-lg md:text-xl text-duoBlue"></i>
+                    <span id="nav-label-pinyin">Pinyin Lab</span>
+                </button>
+                <button onclick="switchMainView('tutor')" id="nav-tutor" class="side-nav-btn flex flex-col md:flex-row items-center gap-1 md:gap-3.5 px-3 py-2 md:px-4 md:py-3.5 rounded-2xl border-2 font-extrabold text-xs md:text-sm transition-all">
+                    <i class="fa-solid fa-robot text-lg md:text-xl text-duoPurple"></i>
+                    <span id="nav-label-tutor">AI Tutor</span>
+                </button>
+                <button onclick="switchMainView('mistakes')" id="nav-mistakes" class="side-nav-btn relative flex flex-col md:flex-row items-center gap-1 md:gap-3.5 px-3 py-2 md:px-4 md:py-3.5 rounded-2xl border-2 font-extrabold text-xs md:text-sm transition-all">
+                    <i class="fa-solid fa-dumbbell text-lg md:text-xl text-duoOrange"></i>
+                    <span id="nav-label-mistakes">Mistakes</span>
+                    <span id="mistake-badge" class="hidden md:ml-auto px-2 py-0.5 rounded-full bg-duoRed text-white text-[11px] font-black">0</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Daily XP Goal Card (Desktop Bottom) -->
+        <div class="hidden md:block bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 mt-6">
+            <div class="flex items-center justify-between mb-2">
+                <span id="sidebar-goal-title" class="text-xs font-extrabold uppercase text-slate-500">Daily Goal</span>
+                <span id="sidebar-xp-text" class="text-xs font-black text-duoOrange">0 / 30 XP</span>
+            </div>
+            <div class="w-full h-3.5 bg-slate-200 rounded-full overflow-hidden">
+                <div id="sidebar-xp-bar" class="h-full bg-duoOrange rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <button onclick="openOnboarding()" id="sidebar-settings-btn" class="mt-3 w-full text-center text-xs font-bold text-slate-400 hover:text-duoBlue transition-colors">
+                <i class="fa-solid fa-gear mr-1"></i> <span>Change Language / Goal</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- ===================================================================== -->
+    <!-- 3. MAIN CONTENT AREA                                                  -->
+    <!-- ===================================================================== -->
+    <div id="main-shell" class="flex-1 flex flex-col min-h-screen pb-20 md:pb-0">
+        
+        <!-- Sticky Top Status Bar (Language Switcher, Streak, Gems, Hearts) -->
+        <header class="sticky top-0 z-20 bg-white/95 backdrop-blur border-b-2 border-slate-100 px-4 sm:px-6 h-16 flex items-center justify-between gap-2">
+            <!-- Instant 3-Language Switcher (介面語言) -->
+            <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+                <button onclick="setLanguage('en')" id="top-lang-en" class="top-lang-btn px-2 sm:px-2.5 py-1 rounded-lg text-xs font-extrabold transition-all">🇺🇸 EN</button>
+                <button onclick="setLanguage('vi')" id="top-lang-vi" class="top-lang-btn px-2 sm:px-2.5 py-1 rounded-lg text-xs font-extrabold transition-all">🇻🇳 VI</button>
+                <button onclick="setLanguage('ja')" id="top-lang-ja" class="top-lang-btn px-2 sm:px-2.5 py-1 rounded-lg text-xs font-extrabold transition-all">🇯🇵 JA</button>
+            </div>
+
+            <!-- Gamification Stats -->
+            <div class="flex items-center gap-3 sm:gap-5">
+                <!-- Streak -->
+                <div class="flex items-center gap-1.5 font-black text-sm text-duoOrange" title="Daily Streak">
+                    <i class="fa-solid fa-fire text-lg"></i>
+                    <span id="stat-streak">1</span>
+                </div>
+                <!-- Gems -->
+                <div class="flex items-center gap-1.5 font-black text-sm text-duoBlue" title="Gems">
+                    <i class="fa-solid fa-gem text-lg"></i>
+                    <span id="stat-gems">120</span>
+                </div>
+                <!-- Hearts + Refill Trigger -->
+                <button onclick="refillHeartsWithGems()" class="flex items-center gap-1.5 font-black text-sm text-duoRed bg-duoRed-light/50 hover:bg-duoRed-light px-2.5 py-1 rounded-xl transition-colors" title="Refill Hearts (50 Gems)">
+                    <i class="fa-solid fa-heart text-lg"></i>
+                    <span id="stat-hearts">5</span>
+                    <i id="heart-plus-icon" class="fa-solid fa-circle-plus text-xs hidden"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Toast Feedback Banner -->
+        <div id="toast-banner" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-xl font-bold text-sm flex items-center gap-2.5 opacity-0 pointer-events-none transition-all duration-300">
+            <i class="fa-solid fa-sparkles text-duoOrange"></i>
+            <span id="toast-text">Message</span>
+        </div>
+
+        <!-- VIEW A: LEARNING PATH (Snake Stepping Stones Map) -->
+        <main id="view-learn" class="view-section flex-1 max-w-2xl w-full mx-auto px-4 py-6 sm:py-8">
+            <!-- Mascot Speech Banner -->
+            <div class="bg-duoBlue-light/60 border-2 border-duoBlue/30 rounded-3xl p-4 sm:p-5 mb-8 flex items-center gap-4">
+                <div class="w-16 h-16 shrink-0 animate-float">
+                    <svg viewBox="0 0 120 120" class="w-full h-full">
+                        <circle cx="28" cy="30" r="16" fill="#27272a"/><circle cx="92" cy="30" r="16" fill="#27272a"/>
+                        <ellipse cx="60" cy="64" rx="44" ry="40" fill="#27272a"/>
+                        <ellipse cx="60" cy="74" rx="18" ry="14" fill="#fef3c7"/>
+                        <circle cx="43" cy="56" r="5" fill="#fff"/><circle cx="44" cy="56" r="2.8" fill="#000"/>
+                        <circle cx="77" cy="56" r="5" fill="#fff"/><circle cx="76" cy="56" r="2.8" fill="#000"/>
+                        <ellipse cx="60" cy="68" rx="5" ry="3.5" fill="#18181b"/>
+                        <path d="M 52 75 Q 60 83 68 75" stroke="#18181b" stroke-width="3" fill="none" stroke-linecap="round"/>
+                        <path d="M 38 98 L 60 112 L 82 98" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <div class="text-xs font-black uppercase text-duoBlue-dark mb-0.5">Formosa Bear AI</div>
+                    <p id="mascot-speech" class="text-sm sm:text-base font-extrabold text-slate-800 leading-snug">
+                        Tap the glowing green node below to start your Taiwan Mandarin adventure!
+                    </p>
+                </div>
+                <button onclick="speakTaiwan('加油！一起學台灣華語！')" class="w-10 h-10 rounded-xl bg-white border-2 border-duoBlue/40 text-duoBlue hover:bg-duoBlue hover:text-white flex items-center justify-center shrink-0 transition-colors">
+                    <i class="fa-solid fa-volume-high"></i>
+                </button>
+            </div>
+
+            <!-- Snake Path Units Container -->
+            <div id="learning-path-container" class="space-y-10 pb-12">
+                <!-- Populated dynamically by JS -->
+            </div>
+        </main>
+
+        <!-- VIEW B: PINYIN & TONES LAB -->
+        <main id="view-pinyin" class="view-section hidden flex-1 max-w-4xl w-full mx-auto px-4 py-6 sm:py-8 space-y-8">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 id="pinyin-lab-title" class="text-2xl font-black text-slate-900">Pinyin & 4 Tones Lab (聲調實驗室)</h2>
+                    <p id="pinyin-lab-sub" class="text-sm text-slate-500 font-semibold">Tap any tone card or syllable to hear native Taiwan Mandarin (1.0x or 0.65x slow).</p>
+                </div>
+                <div class="inline-flex items-center gap-2 bg-duoBlue-light px-3.5 py-2 rounded-2xl text-xs font-extrabold text-duoBlue-dark self-start">
+                    <i class="fa-solid fa-ear-listen"></i>
+                    <span id="pinyin-tip-badge">zh-TW Native Voice</span>
+                </div>
+            </div>
+
+            <!-- Interactive 4 Tones + Neutral Tone Cards -->
+            <div id="pinyin-tones-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                <!-- Populated by JS -->
+            </div>
+
+            <!-- Initials & Finals Soundboard -->
+            <div class="bg-slate-50 border-2 border-slate-200 rounded-3xl p-5 sm:p-6">
+                <h3 id="soundboard-title" class="text-lg font-black text-slate-800 mb-1">Essential Syllables Soundboard (常用拼音發音表)</h3>
+                <p id="soundboard-sub" class="text-xs font-bold text-slate-500 mb-4">Click a tile for normal speed, or the turtle button for slow pronunciation.</p>
+                <div id="pinyin-syllables-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </main>
+
+        <!-- VIEW C: AI SMART TUTOR (Multilingual Comparative Tips & Cultural Guide) -->
+        <main id="view-tutor" class="view-section hidden flex-1 max-w-3xl w-full mx-auto px-4 py-6 sm:py-8 space-y-6">
+            <div class="bg-gradient-to-br from-duoPurple to-indigo-600 rounded-3xl p-6 text-white shadow-lg flex items-center gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center text-3xl shrink-0">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <div>
+                    <h2 id="tutor-header-title" class="text-xl sm:text-2xl font-black">AI Taiwan Mandarin Sensei</h2>
+                    <p id="tutor-header-sub" class="text-xs sm:text-sm text-purple-100 font-semibold mt-0.5">
+                        Personalized pronunciation & character tips tailored to your native language!
+                    </p>
+                </div>
+            </div>
+
+            <!-- Interactive Quick-Ask AI Topics -->
+            <div>
+                <h3 id="tutor-topics-label" class="text-xs font-black uppercase tracking-wider text-slate-400 mb-3">
+                    Tap a question to ask AI Tutor:
+                </h3>
+                <div id="tutor-topic-buttons" class="flex flex-wrap gap-2">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- AI Explanation Display Card -->
+            <div id="tutor-response-card" class="bg-white border-2 border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
+                <!-- Populated by JS -->
+            </div>
+        </main>
+
+        <!-- VIEW D: MISTAKES REVIEW LAB -->
+        <main id="view-mistakes" class="view-section hidden flex-1 max-w-2xl w-full mx-auto px-4 py-6 sm:py-8 space-y-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 id="mistakes-title" class="text-2xl font-black text-slate-900">Mistakes Review (錯題複習本)</h2>
+                    <p id="mistakes-sub" class="text-sm font-semibold text-slate-500">Practice missed questions to master them and earn +1 Heart!</p>
+                </div>
+                <button id="start-mistake-drill-btn" onclick="startMistakePractice()" class="btn-3d px-4 py-3 rounded-2xl bg-duoOrange border-b-4 border-duoOrange-dark text-white font-black text-xs sm:text-sm uppercase shadow-sm">
+                    <i class="fa-solid fa-bolt mr-1"></i> <span id="btn-practice-mistakes">Practice Now</span>
+                </button>
+            </div>
+
+            <div id="mistakes-list-container" class="space-y-3">
+                <!-- Populated by JS -->
+            </div>
+        </main>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- 4. FULLSCREEN INTERACTIVE LESSON STAGE (Duolingo Quiz Arena)          -->
+    <!-- ===================================================================== -->
+    <div id="lesson-stage" class="fixed inset-0 z-40 bg-white hidden flex flex-col">
+        <!-- Top Lesson Progress & Hearts -->
+        <div class="max-w-3xl w-full mx-auto px-4 sm:px-6 pt-5 pb-3 flex items-center gap-4">
+            <button onclick="exitLesson()" class="w-10 h-10 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center transition-colors">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <!-- Animated Progress Bar -->
+            <div class="flex-1 h-4 bg-slate-200 rounded-full overflow-hidden p-0.5">
+                <div id="lesson-progress-bar" class="h-full bg-duoGreen rounded-full transition-all duration-500 relative" style="width: 10%">
+                    <div class="h-1 bg-white/30 rounded-full mx-2 mt-0.5"></div>
+                </div>
+            </div>
+            <!-- Combo Badge -->
+            <div id="lesson-combo-badge" class="hidden px-2.5 py-1 rounded-xl bg-duoOrange-light text-duoOrange-dark font-black text-xs animate-pop">
+                🔥 2x
+            </div>
+            <!-- Hearts -->
+            <div class="flex items-center gap-1.5 font-black text-duoRed text-base">
+                <i class="fa-solid fa-heart text-xl"></i>
+                <span id="lesson-hearts-count">5</span>
+            </div>
+        </div>
+
+        <!-- Question Arena Body -->
+        <div id="lesson-question-area" class="flex-1 max-w-2xl w-full mx-auto px-4 sm:px-6 py-4 overflow-y-auto flex flex-col justify-center">
+            <!-- Dynamic Question Content -->
+        </div>
+
+        <!-- Bottom Action / Feedback Drawer -->
+        <div id="lesson-footer" class="border-t-2 border-slate-200 bg-white px-4 sm:px-6 py-4 sm:py-6 transition-colors duration-200">
+            <div class="max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+                <!-- Feedback Message & AI Explanation (Hidden until answered) -->
+                <div id="lesson-feedback-box" class="hidden flex-1 w-full">
+                    <div class="flex items-start gap-3">
+                        <div id="feedback-icon" class="w-11 h-11 rounded-full bg-white flex items-center justify-center text-2xl shrink-0 shadow-sm">
+                            <i class="fa-solid fa-check text-duoGreen"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h4 id="feedback-heading" class="font-black text-lg">Excellent!</h4>
+                            <p id="feedback-detail" class="text-sm font-bold mt-0.5"></p>
+                            <!-- AI Tutor Instant Insight Box -->
+                            <div id="ai-insight-pill" class="mt-2.5 bg-white/90 rounded-2xl p-3 border border-black/10 text-xs font-bold text-slate-700 flex items-start gap-2">
+                                <i class="fa-solid fa-robot text-duoPurple text-sm mt-0.5"></i>
+                                <span id="ai-insight-text">AI Tip here</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Check / Continue Button -->
+                <button id="lesson-action-btn" onclick="handleLessonPrimaryAction()" disabled class="btn-3d w-full sm:w-auto sm:min-w-[180px] ml-auto py-3.5 px-8 rounded-2xl bg-slate-200 border-b-4 border-slate-300 text-slate-400 font-black text-base uppercase tracking-wide transition-all">
+                    Check
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- 5. LESSON COMPLETE CELEBRATION MODAL                                  -->
+    <!-- ===================================================================== -->
+    <div id="lesson-complete-modal" class="fixed inset-0 z-50 bg-white hidden flex flex-col items-center justify-center p-6 text-center">
+        <div class="max-w-md w-full animate-pop space-y-6">
+            <div class="w-28 h-28 mx-auto rounded-full bg-duoOrange-light flex items-center justify-center text-6xl text-duoOrange shadow-inner">
+                🏆
+            </div>
+            <div>
+                <h2 id="complete-title" class="text-3xl font-black text-duoOrange mb-1">Lesson Complete!</h2>
+                <p id="complete-sub" class="text-sm font-bold text-slate-500">You're one step closer to speaking Taiwan Mandarin!</p>
+            </div>
+
+            <!-- Rewards Summary Cards -->
+            <div class="grid grid-cols-3 gap-3">
+                <div class="bg-duoOrange-light/60 border-2 border-duoOrange rounded-2xl p-3">
+                    <div class="text-[11px] font-black uppercase text-duoOrange-dark">Total XP</div>
+                    <div id="reward-xp" class="text-xl font-black text-duoOrange mt-1">+20</div>
+                </div>
+                <div class="bg-duoGreen-light/60 border-2 border-duoGreen rounded-2xl p-3">
+                    <div id="reward-acc-label" class="text-[11px] font-black uppercase text-duoGreen-dark">Accuracy</div>
+                    <div id="reward-acc" class="text-xl font-black text-duoGreen-dark mt-1">100%</div>
+                </div>
+                <div class="bg-duoBlue-light/60 border-2 border-duoBlue rounded-2xl p-3">
+                    <div id="reward-gems-label" class="text-[11px] font-black uppercase text-duoBlue-dark">Gems</div>
+                    <div id="reward-gems" class="text-xl font-black text-duoBlue mt-1">+15 💎</div>
+                </div>
+            </div>
+
+            <button onclick="closeCompleteModal()" id="complete-continue-btn" class="btn-3d w-full py-4 rounded-2xl bg-duoGreen border-b-4 border-duoGreen-dark text-white font-black text-base uppercase tracking-wide shadow-md">
+                Continue
+            </button>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- JAVASCRIPT ENGINE: I18N, CURRICULUM, AUDIO, GAME LOOP & AI TUTOR      -->
+    <!-- ===================================================================== -->
+    <script>
+        // ---------------------------------------------------------------------
+        // 1. TRILINGUAL UI TRANSLATIONS (English, Tiếng Việt, 日本語)
+        // ---------------------------------------------------------------------
+        const I18N = {
+            en: {
+                obTitle: "Learn Taiwan Mandarin the Fun Way!",
+                obSubtitle: "Zero experience needed. Choose your native language to begin:",
+                obGoalLabel: "Daily Learning Goal",
+                obGoalCasual: "Casual • 5 min",
+                obGoalSerious: "Serious • 15 min",
+                obStartBtn: "Start Learning Now!",
+                navLearn: "Learn",
+                navPinyin: "Pinyin Lab",
+                navTutor: "AI Tutor",
+                navMistakes: "Mistakes",
+                sidebarGoalTitle: "Daily Goal",
+                sidebarSettings: "Language & Goal",
+                mascotReady: "Tap the glowing node below to start your Taiwan Mandarin adventure!",
+                mascotGreat: "Awesome progress! Keep your daily streak alive!",
+                startNodeBtn: "START +20 XP",
+                practiceNodeBtn: "PRACTICE +10 XP",
+                lockedToast: "Complete the previous lesson to unlock this stage!",
+                noHeartsToast: "Out of hearts! Click the ❤️ button at the top to refill with Gems.",
+                refillSuccess: "Hearts refilled to 5! (-50 Gems)",
+                notEnoughGems: "Need 50 Gems! Practice Mistakes or complete a lesson to earn Gems.",
+                pinyinLabTitle: "Pinyin & 4 Tones Lab (聲調實驗室)",
+                pinyinLabSub: "Tap any card to hear native Taiwan Mandarin (1.0x or 0.65x slow turtle).",
+                soundboardTitle: "Essential Syllables Soundboard (常用拼音發音表)",
+                soundboardSub: "Tap speaker for normal speed, or turtle for 0.65x slow mode.",
+                tutorTitle: "AI Taiwan Mandarin Sensei",
+                tutorSub: "Smart comparisons & cultural tips customized for English speakers.",
+                tutorTopicsLabel: "Tap a topic to ask AI Sensei:",
+                mistakesTitle: "Mistakes Review (錯題複習本)",
+                mistakesSub: "Master your missed items and earn +1 Heart!",
+                btnPracticeMistakes: "Start Drill",
+                noMistakesText: "Zero mistakes! You are doing amazing. Keep advancing on the map!",
+                btnCheck: "Check",
+                btnContinue: "Continue",
+                correctTitles: ["Amazing!", "Spot on!", "Tai Hao Le! (太好了!)", "Superb!"],
+                wrongTitle: "Correct solution:",
+                completeTitle: "Lesson Complete!",
+                completeSub: "You unlocked new Taiwan Mandarin skills!",
+                rewardAccLabel: "Accuracy",
+                rewardGemsLabel: "Gems",
+                qTypeListen: "Tap what you hear",
+                qTypeMatch: "Tap the matching pairs",
+                qTypeBuild: "Build this sentence in Traditional Chinese",
+                qTypeCulture: "Character & Culture Insight",
+                tapResetWords: "Tap words below to build the sentence"
+            },
+            vi: {
+                obTitle: "Học Tiếng Trung Đài Loan Thật Vui!",
+                obSubtitle: "Dành cho người mới bắt đầu từ số 0. Chọn ngôn ngữ của bạn:",
+                obGoalLabel: "Mục tiêu học mỗi ngày",
+                obGoalCasual: "Thư giãn • 5 phút",
+                obGoalSerious: "Nghiêm túc • 15 phút",
+                obStartBtn: "Bắt đầu học ngay!",
+                navLearn: "Bản đồ học",
+                navPinyin: "Luyện Pinyin",
+                navTutor: "Gia sư AI",
+                navMistakes: "Ôn lỗi sai",
+                sidebarGoalTitle: "Mục tiêu ngày",
+                sidebarSettings: "Ngôn ngữ & Mục tiêu",
+                mascotReady: "Nhấn vào vòng tròn phát sáng bên dưới để bắt đầu hành trình tiếng Trung Đài Loan!",
+                mascotGreat: "Tiến bộ tuyệt vời! Hãy giữ vững chuỗi ngày học liên tiếp nhé!",
+                startNodeBtn: "BẮT ĐẦU +20 XP",
+                practiceNodeBtn: "LUYỆN TẬP +10 XP",
+                lockedToast: "Hãy hoàn thành chặng trước để mở khóa bài này nhé!",
+                noHeartsToast: "Bạn đã hết tim! Nhấn vào biểu tượng ❤️ ở góc trên để hồi phục bằng Đá quý.",
+                refillSuccess: "Đã hồi đầy 5 trái tim! (-50 Đá quý)",
+                notEnoughGems: "Cần 50 Đá quý! Hãy ôn lỗi sai hoặc hoàn thành bài học để kiếm thêm.",
+                pinyinLabTitle: "Phòng thí nghiệm Pinyin & 4 Thanh điệu",
+                pinyinLabSub: "Nhấn vào thẻ để nghe giọng chuẩn Đài Loan (1.0x hoặc chế độ rùa chậm 0.65x).",
+                soundboardTitle: "Bảng phát âm âm tiết cơ bản (常用拼音發音表)",
+                soundboardSub: "Nhấn biểu tượng loa để nghe tốc độ chuẩn, hoặc hình rùa để nghe chậm.",
+                tutorTitle: "Gia sư AI Tiếng Trung Đài Loan",
+                tutorSub: "Mẹo phát âm & văn hóa Đài Loan được thiết kế riêng cho người Việt.",
+                tutorTopicsLabel: "Chọn chủ đề để hỏi Gia sư AI:",
+                mistakesTitle: "Sổ tay ôn tập lỗi sai (錯題複習本)",
+                mistakesSub: "Luyện lại các câu từng làm sai để nhận thêm +1 Tim!",
+                btnPracticeMistakes: "Luyện ngay",
+                noMistakesText: "Chưa có lỗi sai nào! Bạn học rất chắc, hãy tiếp tục chinh phục bản đồ nhé!",
+                btnCheck: "Kiểm tra",
+                btnContinue: "Tiếp tục",
+                correctTitles: ["Chính xác!", "Tuyệt vời!", "Quá đỉnh! (太棒了!)", "Xuất sắc!"],
+                wrongTitle: "Đáp án đúng là:",
+                completeTitle: "Hoàn thành bài học!",
+                completeSub: "Bạn vừa chinh phục thêm kỹ năng Tiếng Trung Đài Loan mới!",
+                rewardAccLabel: "Chính xác",
+                rewardGemsLabel: "Đá quý",
+                qTypeListen: "Nghe và chọn đáp án đúng",
+                qTypeMatch: "Chạm để ghép các cặp tương ứng",
+                qTypeBuild: "Ghép các khối từ thành câu hoàn chỉnh",
+                qTypeCulture: "Khám phá chữ Phồn thể & Văn hóa",
+                tapResetWords: "Nhấn vào các từ bên dưới để xếp thành câu"
+            },
+            ja: {
+                obTitle: "楽しく台湾華語をマスターしよう！",
+                obSubtitle: "完全ゼロからスタート。あなたの母語を選んでください：",
+                obGoalLabel: "1日の学習目標",
+                obGoalCasual: "マイペース • 5分",
+                obGoalSerious: "しっかり • 15分",
+                obStartBtn: "今すぐ学習を始める！",
+                navLearn: "学習マップ",
+                navPinyin: "ピンイン練習",
+                navTutor: "AI先生",
+                navMistakes: "弱点復習",
+                sidebarGoalTitle: "今日の目標",
+                sidebarSettings: "言語と目標設定",
+                mascotReady: "下の光っているステージをタップして、台湾華語の冒険を始めよう！",
+                mascotGreat: "素晴らしい進捗です！連続記録を伸ばしましょう！",
+                startNodeBtn: "スタート +20 XP",
+                practiceNodeBtn: "復習する +10 XP",
+                lockedToast: "前のレッスンをクリアするとロックが解除されます！",
+                noHeartsToast: "ライフがありません！右上の❤️ボタンからジェムで回復できます。",
+                refillSuccess: "ライフが5に回復しました！(-50 ジェム)",
+                notEnoughGems: "ジェムが50個必要です！レッスンや弱点復習で集めましょう。",
+                pinyinLabTitle: "ピンイン＆4声ラボ (聲調實驗室)",
+                pinyinLabSub: "カードをタップして台湾標準語の発音（通常1.0x / カメ低速0.65x）を聞こう。",
+                soundboardTitle: "基本音節サウンドボード (常用拼音發音表)",
+                soundboardSub: "スピーカーで通常再生、カメボタンで0.65倍速のゆっくり再生ができます。",
+                tutorTitle: "AI 台湾華語パーソナル先生",
+                tutorSub: "日本語話者向けに漢字の違いや台湾発音のコツをわかりやすく解説！",
+                tutorTopicsLabel: "AI先生に質問したいトピックを選択：",
+                mistakesTitle: "弱点・間違い復習帳 (錯題複習本)",
+                mistakesSub: "間違えた問題を復習して、ライフを +1 回復しよう！",
+                btnPracticeMistakes: "特訓を開始",
+                noMistakesText: "現在ミスはありません！素晴らしい調子です。次のステージへ進みましょう！",
+                btnCheck: "確認する",
+                btnContinue: "次へ進む",
+                correctTitles: ["正解です！", "素晴らしい！", "完璧！(太棒了!)", "その調子！"],
+                wrongTitle: "正解はこちら：",
+                completeTitle: "レッスン完了！",
+                completeSub: "新しい台湾華語のスキルを習得しました！",
+                rewardAccLabel: "正答率",
+                rewardGemsLabel: "ジェム",
+                qTypeListen: "音声を聞いて正しいものを選ぼう",
+                qTypeMatch: "ペアになるものをタップして消そう",
+                qTypeBuild: "単語ブロックを並べて文を作ろう",
+                qTypeCulture: "繁体字の成り立ち＆台湾文化クイズ",
+                tapResetWords: "下の単語をタップして文を組み立ててください"
+            }
+        };
+
+        // ---------------------------------------------------------------------
+        // 2. CURRICULUM: SNAKE PATH UNITS, NODES & RICH INTERACTIVE QUESTIONS
+        // ---------------------------------------------------------------------
+        const CURRICULUM_UNITS = [
+            {
+                id: "unit1",
+                color: "duoGreen",
+                title: { en: "Unit 1: Tones & Taiwan Greetings", vi: "Chặng 1: Thanh điệu & Chào hỏi Đài Loan", ja: "ユニット1：声調と台湾の挨拶" },
+                desc: { en: "Master the 4 tones and say hello like a local in Taipei", vi: "Làm chủ 4 thanh điệu và chào hỏi tự nhiên như người Đài Bắc", ja: "4つの声調と台北ネイティブの挨拶をマスター" },
+                nodes: [
+                    {
+                        id: "n1",
+                        icon: "fa-wave-square",
+                        title: { en: "4 Tones & Hello", vi: "4 Thanh điệu & Xin chào", ja: "4声とこんにちは" },
+                        questions: [
+                            {
+                                id: "q1_1",
+                                type: "listen_choice",
+                                audioText: "你好",
+                                promptHint: "nǐ hǎo",
+                                options: [
+                                    { tc: "你好", pinyin: "nǐ hǎo", meaning: { en: "Hello", vi: "Xin chào", ja: "こんにちは" }, correct: true },
+                                    { tc: "謝謝", pinyin: "xièxie", meaning: { en: "Thank you", vi: "Cảm ơn", ja: "ありがとう" }, correct: false },
+                                    { tc: "再見", pinyin: "zàijiàn", meaning: { en: "Goodbye", vi: "Tạm biệt", ja: "さようなら" }, correct: false }
+                                ],
+                                aiTip: {
+                                    en: "Both 你 (nǐ) and 好 (hǎo) are 3rd tone! In Taiwan Mandarin, when two 3rd tones meet, the first one automatically changes to a rising 2nd tone: 'ní hǎo'.",
+                                    vi: "Cả 你 (nǐ) và 好 (hǎo) đều mang thanh 3! Trong tiếng Trung Đài Loan, khi hai thanh 3 đi liền nhau, âm đầu biến thành thanh 2 đọc là 'ní hǎo'.",
+                                    ja: "「你 (nǐ)」と「好 (hǎo)」はどちらも第3声です。第3声が2つ続くときは、最初の文字が第2声に変化して「ní hǎo」と発音します！"
+                                }
+                            },
+                            {
+                                id: "q1_2",
+                                type: "culture_choice",
+                                badge: { en: "Character Magic", vi: "Bí mật chữ Phồn thể", ja: "漢字の成り立ち" },
+                                prompt: {
+                                    en: "The Traditional character 「好」 (hǎo = good) combines 「女」 (woman) + 「子」 (child). What does it mean?",
+                                    vi: "Chữ Phồn thể 「好」 (hǎo) ghép từ bộ 「女」 (phụ nữ) + 「子」 (con cái). Chữ này có nghĩa là gì?",
+                                    ja: "繁体字の「好」(hǎo) は「女」＋「子」が組み合わさっています。どんな意味でしょう？"
+                                },
+                                displayTc: "好",
+                                displayPinyin: "hǎo",
+                                options: [
+                                    { text: { en: "Good / Fine", vi: "Tốt / Khỏe", ja: "良い・元気" }, correct: true },
+                                    { text: { en: "Sorry", vi: "Xin lỗi", ja: "ごめんなさい" }, correct: false },
+                                    { text: { en: "Bubble Tea", vi: "Trà sữa", ja: "タピオカティー" }, correct: false }
+                                ],
+                                aiTip: {
+                                    en: "In ancient Chinese culture, having a mother (女) and child (子) together symbolized happiness and goodness (好)!",
+                                    vi: "Trong văn hóa cổ đại, hình ảnh người mẹ (女) bên đứa con (子) tượng trưng cho sự tốt đẹp, hạnh phúc (好).",
+                                    ja: "古代では母親（女）と子ども（子）が一緒にいる姿が「良いこと・幸せ（好）」を表していました！"
+                                }
+                            },
+                            {
+                                id: "q1_3",
+                                type: "match_pairs",
+                                pairs: [
+                                    { id: "p1", tc: "你好", pinyin: "nǐ hǎo", trans: { en: "Hello", vi: "Xin chào", ja: "こんにちは" } },
+                                    { id: "p2", tc: "謝謝", pinyin: "xièxie", trans: { en: "Thank you", vi: "Cảm ơn", ja: "ありがとう" } },
+                                    { id: "p3", tc: "不客氣", pinyin: "bú kèqì", trans: { en: "You're welcome", vi: "Không có chi", ja: "どういたしまして" } },
+                                    { id: "p4", tc: "再見", pinyin: "zàijiàn", trans: { en: "Goodbye", vi: "Tạm biệt", ja: "さようなら" } }
+                                ],
+                                aiTip: {
+                                    en: "Notice that in 謝謝 (xièxie), the second character has no tone mark—it's pronounced lightly (Neutral Tone)!",
+                                    vi: "Lưu ý trong từ 謝謝 (xièxie), chữ thứ hai không có dấu thanh điệu—đọc nhẹ và ngắn (Thanh nhẹ)!",
+                                    ja: "「謝謝 (xièxie)」の2文字目には声調記号がありません。力を抜いて軽く短く（軽声）発音するのがポイントです。"
+                                }
+                            },
+                            {
+                                id: "q1_4",
+                                type: "word_builder",
+                                targetTc: "謝謝你",
+                                targetPinyin: "xièxie nǐ",
+                                meaning: { en: "Thank you", vi: "Cảm ơn bạn", ja: "あなたに感謝します（ありがとう）" },
+                                bank: ["謝謝", "你好", "你", "再見"],
+                                aiTip: {
+                                    en: "Adding 你 (nǐ = you) after 謝謝 makes your thank-you warmer and more personal: 謝謝你!",
+                                    vi: "Thêm chữ 你 (nǐ = bạn) sau 謝謝 giúp lời cảm ơn thân thiện và chân thành hơn: 謝謝你!",
+                                    ja: "「謝謝」の後ろに「你 (nǐ = あなた)」をつけると、より丁寧で温かい感謝の表現になります！"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        id: "n2",
+                        icon: "fa-face-smile-beam",
+                        title: { en: "Polite Taiwan Phrases", vi: "Câu cửa miệng lịch sự", ja: "台湾の丁寧フレーズ" },
+                        questions: [
+                            {
+                                id: "q2_1",
+                                type: "listen_choice",
+                                audioText: "不好意思",
+                                promptHint: "bù hǎoyìsi",
+                                options: [
+                                    { tc: "不好意思", pinyin: "bù hǎoyìsi", meaning: { en: "Excuse me / Sorry", vi: "Xin lỗi / Ngại quá", ja: "すみません" }, correct: true },
+                                    { tc: "不客氣", pinyin: "bú kèqì", meaning: { en: "You're welcome", vi: "Không có chi", ja: "どういたしまして" }, correct: false },
+                                    { tc: "台灣", pinyin: "Táiwān", meaning: { en: "Taiwan", vi: "Đài Loan", ja: "台湾" }, correct: false }
+                                ],
+                                aiTip: {
+                                    en: "「不好意思」 is the #1 magic phrase in Taiwan! Use it to get a waiter's attention, pass through a crowd, or say a polite sorry.",
+                                    vi: "「不好意思」 là câu cửa miệng số 1 ở Đài Loan! Dùng khi muốn gọi nhân viên, xin nhường đường hoặc xin lỗi nhẹ nhàng.",
+                                    ja: "「不好意思」は台湾で一番使われる魔法のフレーズ！店員さんを呼ぶ時、人混みを通る時、軽い謝罪すべてに使えます。"
+                                }
+                            },
+                            {
+                                id: "q2_2",
+                                type: "word_builder",
+                                targetTc: "不好意思請問",
+                                targetPinyin: "bù hǎoyìsi qǐngwèn",
+                                meaning: { en: "Excuse me, may I ask...", vi: "Xin lỗi, cho tôi hỏi...", ja: "すみません、お尋ねしますが…" },
+                                bank: ["請問", "不好意思", "謝謝", "嗎"],
+                                aiTip: {
+                                    en: "Combine 不好意思 (Excuse me) + 請問 (May I ask) before any question in Taiwan to sound super polite!",
+                                    vi: "Ghép 不好意思 (Xin lỗi) + 請問 (Xin hỏi) trước mọi câu hỏi tại Đài Loan sẽ cực kỳ lịch sự!",
+                                    ja: "「不好意思（すみません）」＋「請問（お尋ねします）」をセットで使うと、台湾でとても礼儀正しい印象になります！"
+                                }
+                            },
+                            {
+                                id: "q2_3",
+                                type: "match_pairs",
+                                pairs: [
+                                    { id: "p2_1", tc: "請問", pinyin: "qǐngwèn", trans: { en: "May I ask", vi: "Xin hỏi", ja: "お尋ねします" } },
+                                    { id: "p2_2", tc: "台灣", pinyin: "Táiwān", trans: { en: "Taiwan", vi: "Đài Loan", ja: "台湾" } },
+                                    { id: "p2_3", tc: "我是", pinyin: "wǒ shì", trans: { en: "I am", vi: "Tôi là", ja: "私は〜です" } },
+                                    { id: "p2_4", tc: "學生", pinyin: "xuéshēng", trans: { en: "Student", vi: "Học sinh / Sinh viên", ja: "学生" } }
+                                ],
+                                aiTip: {
+                                    en: "Notice Traditional 「台灣」 (Taiwan) and 「學生」 (Student). Traditional characters preserve classical strokes!",
+                                    vi: "Chú ý chữ Phồn thể 「台灣」 (Đài Loan) và 「學生」 (Học sinh). Chữ Phồn thể giữ nguyên nét đẹp truyền thống!",
+                                    ja: "繁体字の「台灣」と「學生」に注目！日本の旧字体と似ている部分が多いので日本人には覚えやすいですよ。"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: "unit2",
+                color: "duoBlue",
+                title: { en: "Unit 2: Bubble Tea & Night Market", vi: "Chặng 2: Trà sữa & Chợ đêm Đài Loan", ja: "ユニット2：タピオカと夜市グルメ" },
+                desc: { en: "Order your custom drink like a true Taiwanese!", vi: "Tự tin gọi trà sữa chuẩn gu người bản xứ!", ja: "台湾人みたいにドリンクをカスタム注文しよう！" },
+                nodes: [
+                    {
+                        id: "n3",
+                        icon: "fa-mug-hot",
+                        title: { en: "Order Bubble Tea", vi: "Gọi trà sữa trân châu", ja: "タピオカを注文" },
+                        questions: [
+                            {
+                                id: "q3_1",
+                                type: "listen_choice",
+                                audioText: "珍珠奶茶",
+                                promptHint: "zhēnzhū nǎichá",
+                                options: [
+                                    { tc: "珍珠奶茶", pinyin: "zhēnzhū nǎichá", meaning: { en: "Bubble Milk Tea", vi: "Trà sữa trân châu", ja: "タピオカミルクティー" }, correct: true },
+                                    { tc: "牛肉麵", pinyin: "niúròumiàn", meaning: { en: "Beef Noodle Soup", vi: "Mì bò Đài Loan", ja: "牛肉麺" }, correct: false },
+                                    { tc: "小籠包", pinyin: "xiǎolóngbāo", meaning: { en: "Soup Dumplings", vi: "Tiểu long bao", ja: "小籠包" }, correct: false }
+                                ],
+                                aiTip: {
+                                    en: "珍珠 (zhēnzhū) literally means 'pearls' (tapioca balls), and 奶茶 (nǎichá) means 'milk tea'!",
+                                    vi: "珍珠 (zhēnzhū) nghĩa đen là 'ngọc trai' (hạt trân châu), còn 奶茶 (nǎichá) là 'trà sữa'!",
+                                    ja: "「珍珠 (zhēnzhū)」は真珠（タピオカ）、「奶茶 (nǎichá)」はミルクティーという意味です！"
+                                }
+                            },
+                            {
+                                id: "q3_2",
+                                type: "word_builder",
+                                targetTc: "我要一杯珍珠奶茶",
+                                targetPinyin: "wǒ yào yī bēi zhēnzhū nǎichá",
+                                meaning: { en: "I want one cup of bubble milk tea", vi: "Tôi muốn một ly trà sữa trân châu", ja: "タピオカミルクティーを1杯ください" },
+                                bank: ["一杯", "我要", "珍珠奶茶", "謝謝"],
+                                aiTip: {
+                                    en: "In Mandarin, you need a measure word between a number and noun: 一 (one) + 杯 (cup) + 珍珠奶茶!",
+                                    vi: "Tiếng Trung cần lượng từ giữa số đếm và danh từ: 一 (một) + 杯 (ly/cốc) + 珍珠奶茶!",
+                                    ja: "中国語では数字と名詞の間に助数詞を入れます：一（1）＋ 杯（杯）＋ 珍珠奶茶！"
+                                }
+                            },
+                            {
+                                id: "q3_3",
+                                type: "culture_choice",
+                                badge: { en: "Taiwan Drink Culture", vi: "Văn hóa trà sữa Đài Loan", ja: "台湾ドリンク文化" },
+                                prompt: {
+                                    en: "At a Taiwan drink shop, the clerk asks your sugar & ice level. What does 「微糖去冰」 mean?",
+                                    vi: "Tại tiệm trà sữa Đài Loan, nhân viên hỏi mức đường đá. 「微糖去冰」 nghĩa là gì?",
+                                    ja: "台湾のドリンクスタンドで店員さんに甘さと氷を聞かれました。「微糖去冰」の意味は？"
+                                },
+                                displayTc: "微糖去冰",
+                                displayPinyin: "wéitáng qùbīng",
+                                options: [
+                                    { text: { en: "30% sugar, no ice", vi: "Ít đường (30%), không đá", ja: "微糖（甘さ控えめ）・氷なし" }, correct: true },
+                                    { text: { en: "Extra sugar, extra ice", vi: "Nhiều đường, nhiều đá", ja: "甘さ多め・氷多め" }, correct: false },
+                                    { text: { en: "Hot water only", vi: "Chỉ nước nóng", ja: "お湯のみ" }, correct: false }
+                                ],
+                                aiTip: {
+                                    en: "微糖 (wéitáng) = 30% slight sugar; 去冰 (qùbīng) = remove ice. This is the most popular combo in Taiwan!",
+                                    vi: "微糖 (wéitáng) = đường nhẹ 30%; 去冰 (qùbīng) = bỏ đá. Đây là công thức gọi trà sữa chuẩn dân Đài Loan!",
+                                    ja: "「微糖」は甘さ30%、「去冰」は氷なし。台湾で最も注文される定番カスタムです！"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        id: "n4",
+                        icon: "fa-utensils",
+                        title: { en: "Night Market Food", vi: "Ẩm thực chợ đêm", ja: "夜市グルメ" },
+                        questions: [
+                            {
+                                id: "q4_1",
+                                type: "match_pairs",
+                                pairs: [
+                                    { id: "p4_1", tc: "牛肉麵", pinyin: "niúròumiàn", trans: { en: "Beef Noodles", vi: "Mì bò", ja: "牛肉麺" } },
+                                    { id: "p4_2", tc: "小籠包", pinyin: "xiǎolóngbāo", trans: { en: "Soup Dumplings", vi: "Tiểu long bao", ja: "小籠包" } },
+                                    { id: "p4_3", tc: "好吃", pinyin: "hǎochī", trans: { en: "Delicious", vi: "Ngon quá", ja: "美味しい" } },
+                                    { id: "p4_4", tc: "夜市", pinyin: "yèshì", trans: { en: "Night Market", vi: "Chợ đêm", ja: "夜市" } }
+                                ],
+                                aiTip: {
+                                    en: "好吃 (hǎochī) literally means 'good to eat'. For drinks, swap 吃 (eat) with 喝 (drink) → 好喝 (hǎohē)!",
+                                    vi: "好吃 (hǎochī) dùng cho đồ ăn ngon. Với đồ uống ngon, chỉ cần đổi 吃 (ăn) thành 喝 (uống) → 好喝 (hǎohē)!",
+                                    ja: "「好吃 (hǎochī)」は食べ物が美味しい時。飲み物が美味しい時は「好喝 (hǎohē)」と言います！"
+                                }
+                            },
+                            {
+                                id: "q4_2",
+                                type: "word_builder",
+                                targetTc: "台灣牛肉麵很好吃",
+                                targetPinyin: "Táiwān niúròumiàn hěn hǎochī",
+                                meaning: { en: "Taiwan beef noodle soup is very delicious", vi: "Mì bò Đài Loan rất ngon", ja: "台湾の牛肉麺はとても美味しいです" },
+                                bank: ["很好吃", "台灣", "牛肉麵", "謝謝"],
+                                aiTip: {
+                                    en: "In Mandarin, adjectives like 好吃 (delicious) usually pair with 很 (hěn = very) in positive statements!",
+                                    vi: "Trong tiếng Trung, tính từ như 好吃 (ngon) thường đi kèm chữ 很 (hěn = rất) trong câu khẳng định!",
+                                    ja: "中国語では形容詞（好吃など）の前に「很 (hěn)」をつけるのが自然な言い方です！"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: "unit3",
+                color: "duoOrange",
+                title: { en: "Unit 3: MRT & Shopping in Taiwan", vi: "Chặng 3: Đi tàu MRT & Mua sắm", ja: "ユニット3：MRT移動とショッピング" },
+                desc: { en: "Navigate Taipei MRT and ask prices effortlessly", vi: "Đi tàu điện MRT Đài Bắc và hỏi giá dễ dàng", ja: "台北MRTでの移動や値段の聞き方をマスター" },
+                nodes: [
+                    {
+                        id: "n5",
+                        icon: "fa-train-subway",
+                        title: { en: "Taiwan MRT & EasyCard", vi: "Tàu điện MRT & Thẻ EasyCard", ja: "台湾MRTと悠遊カード" },
+                        questions: [
+                            {
+                                id: "q5_1",
+                                type: "culture_choice",
+                                badge: { en: "Taiwan Vocabulary", vi: "Từ vựng đặc trưng Đài Loan", ja: "台湾特有の単語" },
+                                prompt: {
+                                    en: "In Taiwan, what is the subway/metro system called?",
+                                    vi: "Tại Đài Loan, hệ thống tàu điện ngầm được gọi là gì?",
+                                    ja: "台湾では地下鉄（メトロ）のことを何と呼びますか？"
+                                },
+                                displayTc: "捷運",
+                                displayPinyin: "jiéyùn",
+                                options: [
+                                    { text: { en: "MRT / Metro (捷運)", vi: "Tàu điện ngầm MRT (捷運)", ja: "MRT・地下鉄 (捷運)" }, correct: true },
+                                    { text: { en: "Convenience Store", vi: "Cửa hàng tiện lợi", ja: "コンビニ" }, correct: false },
+                                    { text: { en: "Night Market", vi: "Chợ đêm", ja: "夜市" }, correct: false }
+                                ],
+                                aiTip: {
+                                    en: "Taiwan calls the metro 捷運 (jiéyùn - Mass Rapid Transit), whereas Mainland China uses 地鐵 (dìtiě).",
+                                    vi: "Đài Loan gọi tàu điện ngầm là 捷運 (jiéyùn - Tiệp vận), khác với Trung Quốc đại lục dùng từ 地鐵 (dìtiě).",
+                                    ja: "台湾では地下鉄を「捷運 (jiéyùn)」と呼びます（中国大陸では地鐵）。台湾旅行の必須単語です！"
+                                }
+                            },
+                            {
+                                id: "q5_2",
+                                type: "word_builder",
+                                targetTc: "請問捷運站在哪裡",
+                                targetPinyin: "qǐngwèn jiéyùnzhàn zài nǎlǐ",
+                                meaning: { en: "Excuse me, where is the MRT station?", vi: "Xin hỏi ga tàu điện MRT ở đâu?", ja: "すみません、MRTの駅はどこですか？" },
+                                bank: ["在哪裡", "請問", "捷運站", "多少錢"],
+                                aiTip: {
+                                    en: "Put any place + 在哪裡 (zài nǎlǐ = is where?) to ask for directions anywhere in Taiwan!",
+                                    vi: "Chỉ cần ghép [Địa điểm] + 在哪裡 (zài nǎlǐ = ở đâu?) là bạn có thể hỏi đường tới bất kỳ đâu ở Đài Loan!",
+                                    ja: "「[場所] ＋ 在哪裡 (zài nǎlǐ = どこにありますか)」の型を覚えれば、どこへでも行けます！"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        id: "n6",
+                        icon: "fa-tags",
+                        title: { en: "Asking Prices & Numbers", vi: "Hỏi giá & Mua sắm", ja: "値段を聞く・買い物" },
+                        questions: [
+                            {
+                                id: "q6_1",
+                                type: "listen_choice",
+                                audioText: "這個多少錢",
+                                promptHint: "zhège duōshǎo qián",
+                                options: [
+                                    { tc: "這個多少錢", pinyin: "zhège duōshǎo qián", meaning: { en: "How much is this?", vi: "Cái này bao nhiêu tiền?", ja: "これはいくらですか？" }, correct: true },
+                                    { tc: "我要珍珠奶茶", pinyin: "wǒ yào zhēnzhū nǎichá", meaning: { en: "I want bubble tea", vi: "Tôi muốn trà sữa", ja: "タピオカティーをください" }, correct: false },
+                                    { tc: "不好意思", pinyin: "bù hǎoyìsi", meaning: { en: "Excuse me", vi: "Xin lỗi", ja: "すみません" }, correct: false }
+                                ],
+                                aiTip: {
+                                    en: "Point to any item at a night market and say 「這個多少錢？」 (zhège duōshǎo qián?) — super easy and natural!",
+                                    vi: "Chỉ vào món đồ ở chợ đêm và hỏi 「這個多少錢？」 (zhège duōshǎo qián?) — cực kỳ đơn giản và tự nhiên!",
+                                    ja: "夜市で商品を指差しながら「這個多少錢？(zhège duōshǎo qián?)」と言うだけで買い物が楽しめます！"
+                                }
+                            },
+                            {
+                                id: "q6_2",
+                                type: "match_pairs",
+                                pairs: [
+                                    { id: "p6_1", tc: "多少錢", pinyin: "duōshǎo qián", trans: { en: "How much?", vi: "Bao nhiêu tiền?", ja: "いくらですか？" } },
+                                    { id: "p6_2", tc: "悠遊卡", pinyin: "yōuyóukǎ", trans: { en: "EasyCard", vi: "Thẻ EasyCard", ja: "悠遊カード" } },
+                                    { id: "p6_3", tc: "便利商店", pinyin: "biànlì shāngdiàn", trans: { en: "Convenience Store", vi: "Cửa hàng tiện lợi", ja: "コンビニ" } },
+                                    { id: "p6_4", tc: "一百塊", pinyin: "yībǎi kuài", trans: { en: "100 NTD", vi: "100 Đài tệ", ja: "100元（台湾ドル）" } }
+                                ],
+                                aiTip: {
+                                    en: "In everyday Taiwan speech, 塊 (kuài) is used for dollars instead of formal 元 (yuán)!",
+                                    vi: "Trong giao tiếp hàng ngày ở Đài Loan, người dân dùng chữ 塊 (kuài) thay cho 元 (yuán) khi nói giá tiền!",
+                                    ja: "台湾の日常会話ではお金の単位に「元」ではなく「塊 (kuài)」を使うのが一般的です！"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        // Pinyin Lab Data
+        const PINYIN_TONES = [
+            { tone: 1, pitch: "5 → 5", tc: "媽", py: "mā", path: "M 10 22 L 90 22", name: { en: "1st Tone (High Flat)", vi: "Thanh 1 (Cao & Đều)", ja: "第1声（高く平ら）" }, meaning: { en: "Mother", vi: "Mẹ", ja: "お母さん" } },
+            { tone: 2, pitch: "3 → 5", tc: "麻", py: "má", path: "M 10 68 Q 50 55 90 22", name: { en: "2nd Tone (Rising)", vi: "Thanh 2 (Đi lên)", ja: "第2声（尻上がり）" }, meaning: { en: "Hemp / Numb", vi: "Tê / Cây gai", ja: "麻・しびれる" } },
+            { tone: 3, pitch: "2 → 1 → 4", tc: "馬", py: "mǎ", path: "M 10 55 Q 45 85 90 35", name: { en: "3rd Tone (Dipping)", vi: "Thanh 3 (Trầm & Lên)", ja: "第3声（低く抑える）" }, meaning: { en: "Horse", vi: "Con ngựa", ja: "馬" } },
+            { tone: 4, pitch: "5 → 1", tc: "罵", py: "mà", path: "M 10 22 L 90 80", name: { en: "4th Tone (Falling)", vi: "Thanh 4 (Giáng mạnh)", ja: "第4声（強く下がる）" }, meaning: { en: "Scold", vi: "Mắng", ja: "叱る" } },
+            { tone: 5, pitch: "Light", tc: "嗎", py: "ma", path: "M 44 50 A 6 6 0 1 0 56 50 A 6 6 0 1 0 44 50", name: { en: "Neutral Tone (Light)", vi: "Thanh nhẹ", ja: "軽声（軽く短く）" }, meaning: { en: "Question particle", vi: "Không? (Trợ từ)", ja: "〜ですか？" } }
+        ];
+
+        const PINYIN_SYLLABLES = [
+            { py: "nǐ", tc: "你" }, { py: "hǎo", tc: "好" }, { py: "xiè", tc: "謝" }, { py: "tái", tc: "台" },
+            { py: "wān", tc: "灣" }, { py: "zhēn", tc: "珍" }, { py: "zhū", tc: "珠" }, { py: "nǎi", tc: "奶" },
+            { py: "chá", tc: "茶" }, { py: "jié", tc: "捷" }, { py: "yùn", tc: "運" }, { py: "qǐng", tc: "請" }
+        ];
+
+        // AI Tutor Knowledge Topics (Tailored per Native Language)
+        const AI_TUTOR_TOPICS = [
+            {
+                id: "t_tones",
+                label: { en: "How do I master the 4 tones?", vi: "Mẹo nhớ 4 thanh điệu cho người Việt?", ja: "4声の発音をマスターするコツは？" },
+                answer: {
+                    en: "Think of tones like musical pitch! 1st tone (mā) is singing a high steady note. 2nd tone (má) is asking 'What?!' with rising intonation. 3rd tone (mǎ) dips low in your throat like a creaky sigh. 4th tone (mà) is a sharp command like 'Stop!'. Always use our 0.65x Turtle button to hear the pitch curve clearly!",
+                    vi: "Tin vui cho người Việt: Tiếng Việt có 6 thanh nên bạn có lợi thế cực lớn! • Thanh 1 (mā) đọc cao ngang như thanh Ngang nhưng cao hơn • Thanh 2 (má) giống thanh Sắc • Thanh 3 (mǎ) gần giống thanh Hỏi (hạ thấp rồi nhích nhẹ) • Thanh 4 (mà) đọc dứt khoát giữa thanh Sắc và thanh Huyền giáng xuống.",
+                    ja: "日本語の高低アクセントを応用しましょう！• 第1声（mā）は「あー」と高く平らに • 第2声（má）は「えっ？」と聞き返すように一気に上げる • 第3声（mǎ）は喉の奥で低く抑える • 第4声（mà）はカラスの鳴き声「カーッ！」のように上から強く落とすのがコツです。"
+                },
+                demoWords: [
+                    { tc: "台灣", py: "Táiwān" },
+                    { tc: "珍珠奶茶", py: "zhēnzhū nǎichá" }
+                ]
+            },
+            {
+                id: "t_trad",
+                label: { en: "Why Traditional Chinese in Taiwan?", vi: "Vì sao Đài Loan dùng chữ Phồn thể?", ja: "台湾の繁体字と日本の漢字の違いは？" },
+                answer: {
+                    en: "Taiwan preserves Traditional Chinese characters (繁體中文), which keep their original pictographic meaning! For example, 愛 (love) still has 心 (heart) right in the center, making characters logical stories rather than random lines.",
+                    vi: "Đài Loan giữ gìn chữ Phồn thể (繁體中文) nguyên bản giàu tính tượng hình! Ví dụ chữ 愛 (Yêu) vẫn giữ nguyên bộ 心 (Trái tim) ở chính giữa—'Yêu là phải có trái tim'. Học theo chiết tự sẽ nhớ rất sâu!",
+                    ja: "台湾の繁体字（繁體中文）は日本の漢字（特に旧字体）と共通点が非常に多く、日本人学習者には大きなアドバンテージです！「台灣」「學生」「捷運」など、意味が直感的にわかる漢字がたくさんあります。"
+                },
+                demoWords: [
+                    { tc: "愛心", py: "àixīn" },
+                    { tc: "學習", py: "xuéxí" }
+                ]
+            },
+            {
+                id: "t_tw_slang",
+                label: { en: "Essential Taiwan-only Words", vi: "Từ vựng chỉ người Đài Loan mới dùng", ja: "台湾ならではの独特な単語" },
+                answer: {
+                    en: "Taiwan Mandarin has its own warm, local vocabulary! Say 捷運 (jiéyùn) for Metro, 計程車 (jìchéngchē) for Taxi, and 垃圾 (lèsè) for trash (pronounced 'lèsè' in Taiwan instead of 'lājī').",
+                    vi: "Tiếng Trung Đài Loan có nhiều từ vựng riêng rất thú vị: Tàu điện ngầm gọi là 捷運 (jiéyùn), Taxi là 計程車 (jìchéngchē), và đặc biệt chữ 垃圾 (rác) người Đài Loan đọc là 'lèsè' chứ không phải 'lājī'!",
+                    ja: "台湾華語には台湾独自の表現があります！地下鉄は「捷運 (jiéyùn)」、タクシーは「計程車 (jìchéngchē)」、そしてゴミは「垃圾」と書いて台湾では「lèsè（ラーサー）」と発音します！"
+                },
+                demoWords: [
+                    { tc: "捷運", py: "jiéyùn" },
+                    { tc: "計程車", py: "jìchéngchē" },
+                    { tc: "垃圾車", py: "lèsèchē" }
+                ]
+            }
+        ];
+
+        // ---------------------------------------------------------------------
+        // 3. GAME STATE & PERSISTENCE
+        // ---------------------------------------------------------------------
+        const DEFAULT_STATE = {
+            onboarded: false,
+            lang: 'en',
+            dailyGoal: 30,
+            xpToday: 0,
+            streak: 1,
+            gems: 120,
+            hearts: 5,
+            completedNodes: [],
+            mistakes: [] // Array of question IDs
+        };
+
+        let appState = { ...DEFAULT_STATE, ...JSON.parse(localStorage.getItem('formosalingo_state') || '{}') };
+
+        function saveState() {
+            localStorage.setItem('formosalingo_state', JSON.stringify(appState));
+            updateHUD();
+        }
+
+        // ---------------------------------------------------------------------
+        // 4. WEB AUDIO SOUND EFFECTS & TAIWAN SPEECH ENGINE (zh-TW)
+        // ---------------------------------------------------------------------
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playChime(type) {
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.09); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.18); // G5
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+                    osc.start(now);
+                    osc.stop(now + 0.38);
+                } else if (type === 'wrong') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.linearRampToValueAtTime(165, now + 0.28);
+                    gain.gain.setValueAtTime(0.16, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'pop') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, now);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                }
+            } catch (e) { /* Ignore audio context autoplay restrictions */ }
+        }
+
+        function speakTaiwan(text, rate = 0.95) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const utter = new SpeechSynthesisUtterance(text);
+            utter.lang = 'zh-TW';
+            utter.rate = rate; // 0.95 for normal, 0.65 for turtle slow mode
+
+            const voices = window.speechSynthesis.getVoices();
+            const twVoice = voices.find(v => v.lang === 'zh-TW' || v.lang === 'zh_TW') ||
+                            voices.find(v => v.lang.includes('zh'));
+            if (twVoice) utter.voice = twVoice;
+
+            window.speechSynthesis.speak(utter);
+        }
+
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+        }
+
+        // ---------------------------------------------------------------------
+        // 5. ONBOARDING & LANGUAGE SWITCHING
+        // ---------------------------------------------------------------------
+        function openOnboarding() {
+            document.getElementById('onboarding-modal').classList.remove('hidden');
+            syncOnboardingSelection();
+        }
+
+        function closeOnboarding() {
+            appState.onboarded = true;
+            saveState();
+            document.getElementById('onboarding-modal').classList.add('hidden');
+            playChime('correct');
+        }
+
+        function selectOnboardingLang(lang) {
+            setLanguage(lang);
+            syncOnboardingSelection();
+            playChime('pop');
+        }
+
+        function selectDailyGoal(xp) {
+            appState.dailyGoal = xp;
+            saveState();
+            syncOnboardingSelection();
+            playChime('pop');
+        }
+
+        function syncOnboardingSelection() {
+            ['en', 'vi', 'ja'].forEach(code => {
+                const el = document.getElementById(`ob-lang-${code}`);
+                el.className = code === appState.lang
+                    ? 'ob-lang-card p-3 rounded-2xl border-2 border-duoBlue bg-duoBlue-light/60 flex flex-col items-center gap-1.5 transition-all scale-105 shadow-sm'
+                    : 'ob-lang-card p-3 rounded-2xl border-2 border-slate-200 hover:border-duoBlue flex flex-col items-center gap-1.5 transition-all';
+            });
+            [30, 60].forEach(goal => {
+                const el = document.getElementById(`ob-goal-${goal}`);
+                el.className = goal === appState.dailyGoal
+                    ? 'ob-goal-btn p-3 rounded-2xl border-2 border-duoGreen bg-duoGreen-light/50 flex items-center justify-between text-xs font-extrabold text-slate-900'
+                    : 'ob-goal-btn p-3 rounded-2xl border-2 border-slate-200 flex items-center justify-between text-xs font-extrabold text-slate-600';
+            });
+        }
+
+        function setLanguage(lang) {
+            appState.lang = lang;
+            saveState();
+            const t = I18N[lang];
+
+            // Top switcher buttons
+            ['en', 'vi', 'ja'].forEach(code => {
+                const btn = document.getElementById(`top-lang-${code}`);
+                btn.className = code === lang
+                    ? 'top-lang-btn px-2 sm:px-2.5 py-1 rounded-lg text-xs font-black bg-white text-duoBlue shadow-sm transition-all'
+                    : 'top-lang-btn px-2 sm:px-2.5 py-1 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition-all';
+            });
+
+            // Onboarding texts
+            document.getElementById('ob-title').textContent = t.obTitle;
+            document.getElementById('ob-subtitle').textContent = t.obSubtitle;
+            document.getElementById('ob-goal-label').textContent = t.obGoalLabel;
+            document.getElementById('ob-goal-casual').textContent = t.obGoalCasual;
+            document.getElementById('ob-goal-serious').textContent = t.obGoalSerious;
+            document.getElementById('ob-start-btn').textContent = t.obStartBtn;
+
+            // Nav labels
+            document.getElementById('nav-label-learn').textContent = t.navLearn;
+            document.getElementById('nav-label-pinyin').textContent = t.navPinyin;
+            document.getElementById('nav-label-tutor').textContent = t.navTutor;
+            document.getElementById('nav-label-mistakes').textContent = t.navMistakes;
+            document.getElementById('sidebar-goal-title').textContent = t.sidebarGoalTitle;
+            document.getElementById('sidebar-settings-btn').querySelector('span').textContent = t.sidebarSettings;
+
+            // Views texts
+            document.getElementById('mascot-speech').textContent = appState.completedNodes.length > 0 ? t.mascotGreat : t.mascotReady;
+            document.getElementById('pinyin-lab-title').textContent = t.pinyinLabTitle;
+            document.getElementById('pinyin-lab-sub').textContent = t.pinyinLabSub;
+            document.getElementById('soundboard-title').textContent = t.soundboardTitle;
+            document.getElementById('soundboard-sub').textContent = t.soundboardSub;
+
+            document.getElementById('tutor-header-title').textContent = t.tutorTitle;
+            document.getElementById('tutor-header-sub').textContent = t.tutorSub;
+            document.getElementById('tutor-topics-label').textContent = t.tutorTopicsLabel;
+
+            document.getElementById('mistakes-title').textContent = t.mistakesTitle;
+            document.getElementById('mistakes-sub').textContent = t.mistakesSub;
+            document.getElementById('btn-practice-mistakes').textContent = t.btnPracticeMistakes;
+
+            // Re-render active sections
+            renderLearningPath();
+            renderPinyinLab();
+            renderAITutor(activeTutorTopicId);
+            renderMistakesView();
+            if (currentLesson) renderCurrentQuestion();
+        }
+
+        function updateHUD() {
+            document.getElementById('stat-streak').textContent = appState.streak;
+            document.getElementById('stat-gems').textContent = appState.gems;
+            document.getElementById('stat-hearts').textContent = appState.hearts;
+
+            const plusIcon = document.getElementById('heart-plus-icon');
+            if (appState.hearts < 5) plusIcon.classList.remove('hidden');
+            else plusIcon.classList.add('hidden');
+
+            // Daily XP Bar
+            const pct = Math.min(100, Math.round((appState.xpToday / appState.dailyGoal) * 100));
+            document.getElementById('sidebar-xp-text').textContent = `${appState.xpToday} / ${appState.dailyGoal} XP`;
+            document.getElementById('sidebar-xp-bar').style.width = `${pct}%`;
+
+            // Mistakes Badge
+            const badge = document.getElementById('mistake-badge');
+            if (appState.mistakes.length > 0) {
+                badge.textContent = appState.mistakes.length;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function refillHeartsWithGems() {
+            const t = I18N[appState.lang];
+            if (appState.hearts >= 5) {
+                showToast("❤️❤️❤️❤️❤️ (5/5)");
+                return;
+            }
+            if (appState.gems >= 50) {
+                appState.gems -= 50;
+                appState.hearts = 5;
+                saveState();
+                playChime('correct');
+                showToast(t.refillSuccess);
+            } else {
+                playChime('wrong');
+                showToast(t.notEnoughGems);
+            }
+        }
+
+        function showToast(msg) {
+            const banner = document.getElementById('toast-banner');
+            document.getElementById('toast-text').textContent = msg;
+            banner.classList.remove('opacity-0', '-translate-y-2');
+            setTimeout(() => {
+                banner.classList.add('opacity-0', '-translate-y-2');
+            }, 2800);
+        }
+
+        // ---------------------------------------------------------------------
+        // 6. MAIN VIEW NAVIGATION
+        // ---------------------------------------------------------------------
+        let currentMainView = 'learn';
+
+        function switchMainView(viewName) {
+            currentMainView = viewName;
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+
+            document.querySelectorAll('.side-nav-btn').forEach(btn => {
+                btn.className = 'side-nav-btn relative flex flex-col md:flex-row items-center gap-1 md:gap-3.5 px-3 py-2 md:px-4 md:py-3.5 rounded-2xl border-2 border-transparent text-slate-500 hover:bg-slate-100 font-extrabold text-xs md:text-sm transition-all';
+            });
+            const active = document.getElementById(`nav-${viewName}`);
+            active.className = 'side-nav-btn relative flex flex-col md:flex-row items-center gap-1 md:gap-3.5 px-3 py-2 md:px-4 md:py-3.5 rounded-2xl border-2 border-duoBlue bg-duoBlue-light/50 text-duoBlue-dark font-extrabold text-xs md:text-sm transition-all';
+
+            if (viewName === 'mistakes') renderMistakesView();
+        }
+
+        // ---------------------------------------------------------------------
+        // 7. RENDER LEARNING PATH (DUOLINGO SNAKE STEPPING STONES)
+        // ---------------------------------------------------------------------
+        function renderLearningPath() {
+            const lang = appState.lang;
+            const t = I18N[lang];
+            const container = document.getElementById('learning-path-container');
+
+            // Flatten all nodes to determine unlock sequence
+            const allNodes = CURRICULUM_UNITS.flatMap(u => u.nodes);
+            let firstUncompletedFound = false;
+
+            const nodeStatusMap = {};
+            allNodes.forEach(node => {
+                if (appState.completedNodes.includes(node.id)) {
+                    nodeStatusMap[node.id] = 'completed';
+                } else if (!firstUncompletedFound) {
+                    nodeStatusMap[node.id] = 'current';
+                    firstUncompletedFound = true;
+                } else {
+                    nodeStatusMap[node.id] = 'locked';
+                }
+            });
+
+            // S-Curve horizontal offsets for playful stepping-stone feel
+            const offsets = ['translate-x-0', '-translate-x-10 sm:-translate-x-14', 'translate-x-0', 'translate-x-10 sm:translate-x-14'];
+            let globalNodeIndex = 0;
+
+            container.innerHTML = CURRICULUM_UNITS.map(unit => {
+                const headerBg = unit.color === 'duoGreen' ? 'bg-duoGreen border-duoGreen-dark' :
+                                 unit.color === 'duoBlue' ? 'bg-duoBlue border-duoBlue-dark' :
+                                 'bg-duoOrange border-duoOrange-dark';
+
+                const nodesHtml = unit.nodes.map(node => {
+                    const status = nodeStatusMap[node.id];
+                    const offsetClass = offsets[globalNodeIndex % offsets.length];
+                    globalNodeIndex++;
+
+                    let circleStyle = '';
+                    let badgeHtml = '';
+                    let iconClass = node.icon;
+
+                    if (status === 'completed') {
+                        circleStyle = 'bg-duoOrange border-duoOrange-dark text-white';
+                        iconClass = 'fa-check';
+                        badgeHtml = `<span class="mt-2 px-3 py-1 rounded-xl bg-duoOrange-light text-duoOrange-dark font-black text-xs">${node.title[lang]}</span>`;
+                    } else if (status === 'current') {
+                        circleStyle = 'bg-duoGreen border-duoGreen-dark text-white ring-8 ring-duoGreen-light';
+                        badgeHtml = `
+                            <div class="mt-2.5 flex flex-col items-center">
+                                <span class="px-3.5 py-1 rounded-xl bg-white border-2 border-duoGreen text-duoGreen-dark font-black text-xs shadow-sm animate-bounce">
+                                    ${t.startNodeBtn}
+                                </span>
+                                <span class="text-xs font-extrabold text-slate-700 mt-1">${node.title[lang]}</span>
+                            </div>
+                        `;
+                    } else {
+                        circleStyle = 'bg-slate-200 border-slate-300 text-slate-400';
+                        iconClass = 'fa-lock';
+                        badgeHtml = `<span class="mt-2 text-xs font-extrabold text-slate-400">${node.title[lang]}</span>`;
+                    }
+
+                    return `
+                        <div class="flex flex-col items-center ${offsetClass} transition-transform">
+                            <button onclick="launchNode('${node.id}', '${status}')" class="btn-3d w-20 h-20 rounded-full border-b-[6px] ${circleStyle} flex items-center justify-center text-2xl sm:text-3xl shadow-md">
+                                <i class="fa-solid ${iconClass}"></i>
+                            </button>
+                            ${badgeHtml}
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <section class="space-y-6">
+                        <!-- Unit Banner -->
+                        <div class="${headerBg} border-b-4 rounded-3xl p-5 text-white shadow-sm">
+                            <h3 class="text-lg sm:text-xl font-black">${unit.title[lang]}</h3>
+                            <p class="text-xs sm:text-sm text-white/90 font-bold mt-0.5">${unit.desc[lang]}</p>
+                        </div>
+                        <!-- Stepping Stones -->
+                        <div class="flex flex-col items-center gap-7 py-2">
+                            ${nodesHtml}
+                        </div>
+                    </section>
+                `;
+            }).join('');
+        }
+
+        // ---------------------------------------------------------------------
+        // 8. INTERACTIVE LESSON ENGINE (4 QUESTION TYPES + AI INSIGHTS)
+        // ---------------------------------------------------------------------
+        let currentLesson = null;
+
+        function launchNode(nodeId, status) {
+            const t = I18N[appState.lang];
+            if (status === 'locked') {
+                playChime('wrong');
+                showToast(t.lockedToast);
+                return;
+            }
+            if (appState.hearts <= 0) {
+                playChime('wrong');
+                showToast(t.noHeartsToast);
+                return;
+            }
+
+            const allNodes = CURRICULUM_UNITS.flatMap(u => u.nodes);
+            const node = allNodes.find(n => n.id === nodeId);
+            if (!node) return;
+
+            currentLesson = {
+                nodeId: node.id,
+                isMistakeDrill: false,
+                questions: JSON.parse(JSON.stringify(node.questions)),
+                index: 0,
+                correctCount: 0,
+                combo: 0,
+                answered: false,
+                selectedData: null
+            };
+
+            openLessonStage();
+        }
+
+        function startMistakePractice() {
+            const t = I18N[appState.lang];
+            if (appState.mistakes.length === 0) {
+                showToast(t.noMistakesText);
+                return;
+            }
+            const allQuestions = CURRICULUM_UNITS.flatMap(u => u.nodes.flatMap(n => n.questions));
+            const drillQuestions = allQuestions.filter(q => appState.mistakes.includes(q.id));
+
+            currentLesson = {
+                nodeId: 'mistake_drill',
+                isMistakeDrill: true,
+                questions: JSON.parse(JSON.stringify(drillQuestions)),
+                index: 0,
+                correctCount: 0,
+                combo: 0,
+                answered: false,
+                selectedData: null
+            };
+
+            openLessonStage();
+        }
+
+        function openLessonStage() {
+            document.getElementById('lesson-stage').classList.remove('hidden');
+            document.getElementById('lesson-hearts-count').textContent = appState.hearts;
+            renderCurrentQuestion();
+        }
+
+        function exitLesson() {
+            currentLesson = null;
+            document.getElementById('lesson-stage').classList.add('hidden');
+            renderLearningPath();
+            renderMistakesView();
+        }
+
+        function renderCurrentQuestion() {
+            if (!currentLesson) return;
+            const lang = appState.lang;
+            const t = I18N[lang];
+            const q = currentLesson.questions[currentLesson.index];
+
+            // Reset UI state
+            currentLesson.answered = false;
+            currentLesson.selectedData = null;
+
+            const pct = Math.round((currentLesson.index / currentLesson.questions.length) * 100);
+            document.getElementById('lesson-progress-bar').style.width = `${Math.max(8, pct)}%`;
+            document.getElementById('lesson-hearts-count').textContent = appState.hearts;
+
+            const comboBadge = document.getElementById('lesson-combo-badge');
+            if (currentLesson.combo >= 2) {
+                comboBadge.textContent = `🔥 ${currentLesson.combo}x`;
+                comboBadge.classList.remove('hidden');
+            } else {
+                comboBadge.classList.add('hidden');
+            }
+
+            // Reset footer drawer
+            const footer = document.getElementById('lesson-footer');
+            footer.className = 'border-t-2 border-slate-200 bg-white px-4 sm:px-6 py-4 sm:py-6 transition-colors duration-200';
+            document.getElementById('lesson-feedback-box').classList.add('hidden');
+
+            const actionBtn = document.getElementById('lesson-action-btn');
+            actionBtn.textContent = t.btnCheck;
+            actionBtn.disabled = true;
+            actionBtn.className = 'btn-3d w-full sm:w-auto sm:min-w-[180px] ml-auto py-3.5 px-8 rounded-2xl bg-slate-200 border-b-4 border-slate-300 text-slate-400 font-black text-base uppercase tracking-wide transition-all';
+
+            const area = document.getElementById('lesson-question-area');
+
+            // --- TYPE A: LISTEN & CHOOSE ---
+            if (q.type === 'listen_choice') {
+                setTimeout(() => speakTaiwan(q.audioText, 0.95), 250);
+                area.innerHTML = `
+                    <div class="space-y-6 animate-pop">
+                        <h3 class="text-xl sm:text-2xl font-black text-slate-900">${t.qTypeListen}</h3>
+                        <!-- Normal & Turtle Audio Buttons -->
+                        <div class="flex items-center justify-center gap-4 py-2">
+                            <button onclick="speakTaiwan('${q.audioText}', 0.95)" class="btn-3d w-24 h-24 rounded-3xl bg-duoBlue border-b-[6px] border-duoBlue-dark text-white flex items-center justify-center text-4xl shadow-md">
+                                <i class="fa-solid fa-volume-high"></i>
+                            </button>
+                            <button onclick="speakTaiwan('${q.audioText}', 0.65)" class="btn-3d w-16 h-16 rounded-2xl bg-duoBlue-light border-b-4 border-duoBlue/40 text-duoBlue-dark flex flex-col items-center justify-center shadow-sm" title="Slow 0.65x">
+                                <i class="fa-solid fa-turtle text-xl"></i>
+                                <span class="text-[10px] font-black mt-0.5">0.65x</span>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 gap-3">
+                            ${q.options.map((opt, idx) => `
+                                <button onclick="selectSingleOption(${idx})" id="opt-card-${idx}" class="opt-choice-card btn-3d w-full p-4 rounded-2xl border-2 border-b-4 border-slate-200 bg-white hover:bg-slate-50 flex items-center justify-between text-left">
+                                    <div>
+                                        <span class="font-tc font-black text-2xl text-slate-900 mr-2">${opt.tc}</span>
+                                        <span class="text-sm font-extrabold text-duoBlue">${opt.pinyin}</span>
+                                    </div>
+                                    <span class="text-xs sm:text-sm font-bold text-slate-500">${opt.meaning[lang]}</span>
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- TYPE B: CHARACTER & CULTURE INSIGHT ---
+            else if (q.type === 'culture_choice') {
+                area.innerHTML = `
+                    <div class="space-y-5 animate-pop">
+                        <span class="inline-block px-3 py-1 rounded-full bg-duoPurple-light text-duoPurple-dark font-black text-xs uppercase">${q.badge[lang]}</span>
+                        <h3 class="text-lg sm:text-xl font-black text-slate-900 leading-snug">${q.prompt[lang]}</h3>
+                        <div class="flex items-center justify-center gap-4 bg-slate-50 border-2 border-slate-200 rounded-3xl p-5">
+                            <div class="text-center">
+                                <div class="font-tc font-black text-5xl text-slate-900">${q.displayTc}</div>
+                                <div class="text-sm font-black text-duoBlue mt-1">${q.displayPinyin}</div>
+                            </div>
+                            <button onclick="speakTaiwan('${q.displayTc}', 0.9)" class="w-12 h-12 rounded-2xl bg-duoBlue text-white flex items-center justify-center text-xl shadow">
+                                <i class="fa-solid fa-volume-high"></i>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 gap-3">
+                            ${q.options.map((opt, idx) => `
+                                <button onclick="selectSingleOption(${idx})" id="opt-card-${idx}" class="opt-choice-card btn-3d w-full p-4 rounded-2xl border-2 border-b-4 border-slate-200 bg-white hover:bg-slate-50 font-extrabold text-base text-slate-800 text-left">
+                                    ${opt.text[lang]}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- TYPE C: WORD BANK SENTENCE BUILDER ---
+            else if (q.type === 'word_builder') {
+                currentLesson.builtWords = [];
+                currentLesson.bankWords = [...q.bank].sort(() => 0.5 - Math.random());
+                area.innerHTML = `
+                    <div class="space-y-6 animate-pop">
+                        <h3 class="text-xl font-black text-slate-900">${t.qTypeBuild}</h3>
+                        <!-- Meaning Prompt + Audio Hint -->
+                        <div class="flex items-center gap-3 bg-duoBlue-light/50 border-2 border-duoBlue/30 rounded-2xl p-4">
+                            <button onclick="speakTaiwan('${q.targetTc}', 0.85)" class="w-11 h-11 rounded-xl bg-duoBlue text-white flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-volume-high"></i>
+                            </button>
+                            <div class="font-extrabold text-base sm:text-lg text-slate-800">${q.meaning[lang]}</div>
+                        </div>
+
+                        <!-- Drop / Built Sentence Zone -->
+                        <div id="builder-target-zone" class="min-h-[76px] p-3 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 flex flex-wrap items-center gap-2">
+                            <span class="text-xs font-bold text-slate-400">${t.tapResetWords}</span>
+                        </div>
+
+                        <!-- Scrambled Word Bank -->
+                        <div id="builder-bank-zone" class="flex flex-wrap justify-center gap-2.5 pt-2">
+                            <!-- Populated by renderBuilderZones() -->
+                        </div>
+                    </div>
+                `;
+                renderBuilderZones();
+            }
+
+            // --- TYPE D: MATCH PAIRS ---
+            else if (q.type === 'match_pairs') {
+                const leftItems = [...q.pairs].sort(() => 0.5 - Math.random());
+                const rightItems = [...q.pairs].sort(() => 0.5 - Math.random());
+                currentLesson.matchState = {
+                    selectedLeft: null,
+                    selectedRight: null,
+                    matchedIds: []
+                };
+
+                // Hide Check button since Match Pairs auto-completes on final match
+                actionBtn.classList.add('hidden');
+
+                area.innerHTML = `
+                    <div class="space-y-5 animate-pop">
+                        <h3 class="text-xl font-black text-slate-900">${t.qTypeMatch}</h3>
+                        <div class="grid grid-cols-2 gap-3 sm:gap-4">
+                            <!-- Left Column: Traditional Chinese + Pinyin -->
+                            <div class="space-y-3">
+                                ${leftItems.map(item => `
+                                    <button onclick="selectMatchTile('left', '${item.id}', '${item.tc}')" id="match-left-${item.id}" class="btn-3d w-full p-3.5 rounded-2xl border-2 border-b-4 border-slate-200 bg-white hover:bg-slate-50 text-center transition-all">
+                                        <div class="font-tc font-black text-xl text-slate-900">${item.tc}</div>
+                                        <div class="text-xs font-extrabold text-duoBlue">${item.pinyin}</div>
+                                    </button>
+                                `).join('')}
+                            </div>
+                            <!-- Right Column: Native Translation -->
+                            <div class="space-y-3">
+                                ${rightItems.map(item => `
+                                    <button onclick="selectMatchTile('right', '${item.id}', '')" id="match-right-${item.id}" class="btn-3d w-full h-[74px] p-3.5 rounded-2xl border-2 border-b-4 border-slate-200 bg-white hover:bg-slate-50 flex items-center justify-center text-center font-extrabold text-sm sm:text-base text-slate-800 transition-all">
+                                        ${item.trans[lang]}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Option Selection for Listen & Culture Questions
+        function selectSingleOption(idx) {
+            if (currentLesson.answered) return;
+            playChime('pop');
+            const q = currentLesson.questions[currentLesson.index];
+            if (q.options[idx].tc) speakTaiwan(q.options[idx].tc, 0.95);
+
+            currentLesson.selectedData = idx;
+            document.querySelectorAll('.opt-choice-card').forEach((card, i) => {
+                if (i === idx) {
+                    card.className = 'opt-choice-card btn-3d w-full p-4 rounded-2xl border-2 border-b-4 border-duoBlue bg-duoBlue-light/50 flex items-center justify-between text-left';
+                } else {
+                    card.className = 'opt-choice-card btn-3d w-full p-4 rounded-2xl border-2 border-b-4 border-slate-200 bg-white hover:bg-slate-50 flex items-center justify-between text-left';
+                }
+            });
+            enableCheckButton();
+        }
+
+        // Word Bank Builder Logic
+        function renderBuilderZones() {
+            const t = I18N[appState.lang];
+            const targetZone = document.getElementById('builder-target-zone');
+            const bankZone = document.getElementById('builder-bank-zone');
+
+            if (currentLesson.builtWords.length === 0) {
+                targetZone.innerHTML = `<span class="text-xs font-bold text-slate-400">${t.tapResetWords}</span>`;
+            } else {
+                targetZone.innerHTML = currentLesson.builtWords.map((word, idx) => `
+                    <button onclick="removeBuiltWord(${idx})" class="btn-3d px-4 py-2.5 rounded-2xl bg-white border-2 border-b-4 border-duoBlue text-slate-900 font-tc font-black text-lg shadow-sm">
+                        ${word}
+                    </button>
+                `).join('');
+            }
+
+            bankZone.innerHTML = currentLesson.bankWords.map((word, idx) => {
+                const used = word === null;
+                return `
+                    <button onclick="pickBankWord(${idx})" ${used ? 'disabled' : ''} class="btn-3d px-4 py-2.5 rounded-2xl border-2 border-b-4 font-tc font-black text-lg transition-all ${
+                        used 
+                        ? 'bg-slate-100 border-slate-200 text-transparent cursor-default' 
+                        : 'bg-white border-slate-200 hover:border-duoBlue text-slate-900 shadow-sm'
+                    }">
+                        ${used ? '口口' : word}
+                    </button>
+                `;
+            }).join('');
+
+            if (currentLesson.builtWords.length > 0) {
+                enableCheckButton();
+            } else {
+                const actionBtn = document.getElementById('lesson-action-btn');
+                actionBtn.disabled = true;
+                actionBtn.className = 'btn-3d w-full sm:w-auto sm:min-w-[180px] ml-auto py-3.5 px-8 rounded-2xl bg-slate-200 border-b-4 border-slate-300 text-slate-400 font-black text-base uppercase tracking-wide transition-all';
+            }
+        }
+
+        function pickBankWord(idx) {
+            if (currentLesson.answered) return;
+            const word = currentLesson.bankWords[idx];
+            if (!word) return;
+            playChime('pop');
+            speakTaiwan(word, 0.95);
+            currentLesson.builtWords.push(word);
+            currentLesson.bankWords[idx] = null;
+            renderBuilderZones();
+        }
+
+        function removeBuiltWord(builtIdx) {
+            if (currentLesson.answered) return;
+            playChime('pop');
+            const word = currentLesson.builtWords[builtIdx];
+            currentLesson.builtWords.splice(builtIdx, 1);
+            const emptySlot = currentLesson.bankWords.indexOf(null);
+            if (emptySlot > -1) currentLesson.bankWords[emptySlot] = word;
+            renderBuilderZones();
+        }
+
+        // Match Pairs Logic
+        function selectMatchTile(side, id, tcText) {
+            if (currentLesson.answered) return;
+            const ms = currentLesson.matchState;
+            if (ms.matchedIds.includes(id)) return;
+
+            playChime('pop');
+            if (tcText) speakTaiwan(tcText, 0.95);
+
+            if (side === 'left') ms.selectedLeft = id;
+            if (side === 'right') ms.selectedRight = id;
+
+            // Highlight selected buttons
+            ['left', 'right'].forEach(s => {
+                currentLesson.questions[currentLesson.index].pairs.forEach(p => {
+                    if (ms.matchedIds.includes(p.id)) return;
+                    const el = document.getElementById(`match-${s}-${p.id}`);
+                    const isSel = (s === 'left' && ms.selectedLeft === p.id) || (s === 'right' && ms.selectedRight === p.id);
+                    if (isSel) {
+                        el.classList.add('border-duoBlue', 'bg-duoBlue-light/50');
+                        el.classList.remove('border-slate-200', 'bg-white');
+                    } else {
+                        el.classList.remove('border-duoBlue', 'bg-duoBlue-light/50');
+                        el.classList.add('border-slate-200', 'bg-white');
+                    }
+                });
+            });
+
+            // Evaluate Pair if both sides chosen
+            if (ms.selectedLeft && ms.selectedRight) {
+                const leftEl = document.getElementById(`match-left-${ms.selectedLeft}`);
+                const rightEl = document.getElementById(`match-right-${ms.selectedRight}`);
+
+                if (ms.selectedLeft === ms.selectedRight) {
+                    // Match!
+                    playChime('correct');
+                    ms.matchedIds.push(ms.selectedLeft);
+                    [leftEl, rightEl].forEach(el => {
+                        el.disabled = true;
+                        el.className = 'w-full p-3.5 rounded-2xl border-2 border-duoGreen bg-duoGreen-light/60 text-duoGreen-dark opacity-50 transition-all text-center';
+                    });
+                    ms.selectedLeft = null;
+                    ms.selectedRight = null;
+
+                    // All pairs matched -> Show Continue Drawer!
+                    if (ms.matchedIds.length === currentLesson.questions[currentLesson.index].pairs.length) {
+                        const actionBtn = document.getElementById('lesson-action-btn');
+                        actionBtn.classList.remove('hidden');
+                        finalizeQuestionResult(true, "");
+                    }
+                } else {
+                    // Mismatch shake
+                    playChime('wrong');
+                    [leftEl, rightEl].forEach(el => el.classList.add('animate-shake', 'border-duoRed', 'bg-duoRed-light'));
+                    setTimeout(() => {
+                        [leftEl, rightEl].forEach(el => el.classList.remove('animate-shake', 'border-duoRed', 'bg-duoRed-light', 'border-duoBlue', 'bg-duoBlue-light/50'));
+                    }, 450);
+                    ms.selectedLeft = null;
+                    ms.selectedRight = null;
+                }
+            }
+        }
+
+        function enableCheckButton() {
+            const actionBtn = document.getElementById('lesson-action-btn');
+            actionBtn.disabled = false;
+            actionBtn.className = 'btn-3d w-full sm:w-auto sm:min-w-[180px] ml-auto py-3.5 px-8 rounded-2xl bg-duoGreen border-b-4 border-duoGreen-dark text-white font-black text-base uppercase tracking-wide shadow-md hover:brightness-105 transition-all';
+        }
+
+        function handleLessonPrimaryAction() {
+            if (!currentLesson) return;
+            if (!currentLesson.answered) {
+                evaluateCurrentAnswer();
+            } else {
+                advanceLessonStep();
+            }
+        }
+
+        function evaluateCurrentAnswer() {
+            const q = currentLesson.questions[currentLesson.index];
+            let isCorrect = false;
+            let correctText = "";
+
+            if (q.type === 'listen_choice' || q.type === 'culture_choice') {
+                const chosen = q.options[currentLesson.selectedData];
+                const rightOpt = q.options.find(o => o.correct);
+                isCorrect = Boolean(chosen && chosen.correct);
+                correctText = rightOpt.tc ? `${rightOpt.tc} (${rightOpt.pinyin})` : rightOpt.text[appState.lang];
+            } else if (q.type === 'word_builder') {
+                const builtStr = currentLesson.builtWords.join('');
+                isCorrect = builtStr === q.targetTc;
+                correctText = `${q.targetTc} (${q.targetPinyin})`;
+                if (isCorrect) speakTaiwan(q.targetTc, 0.9);
+            }
+
+            finalizeQuestionResult(isCorrect, correctText);
+        }
+
+        function finalizeQuestionResult(isCorrect, correctText) {
+            currentLesson.answered = true;
+            const lang = appState.lang;
+            const t = I18N[lang];
+            const q = currentLesson.questions[currentLesson.index];
+
+            const footer = document.getElementById('lesson-footer');
+            const feedbackBox = document.getElementById('lesson-feedback-box');
+            const iconBox = document.getElementById('feedback-icon');
+            const heading = document.getElementById('feedback-heading');
+            const detail = document.getElementById('feedback-detail');
+            const aiText = document.getElementById('ai-insight-text');
+            const actionBtn = document.getElementById('lesson-action-btn');
+
+            feedbackBox.classList.remove('hidden');
+            aiText.textContent = q.aiTip[lang];
+
+            if (isCorrect) {
+                playChime('correct');
+                currentLesson.correctCount += 1;
+                currentLesson.combo += 1;
+
+                // Remove from mistakes if drilled successfully
+                if (currentLesson.isMistakeDrill) {
+                    appState.mistakes = appState.mistakes.filter(id => id !== q.id);
+                    saveState();
+                }
+
+                footer.className = 'border-t-2 border-duoGreen bg-duoGreen-light px-4 sm:px-6 py-4 sm:py-6 transition-colors duration-200';
+                iconBox.innerHTML = '<i class="fa-solid fa-check text-duoGreen"></i>';
+                heading.className = 'font-black text-lg text-duoGreen-dark';
+                heading.textContent = t.correctTitles[Math.floor(Math.random() * t.correctTitles.length)];
+                detail.textContent = "";
+
+                actionBtn.textContent = t.btnContinue;
+                actionBtn.className = 'btn-3d w-full sm:w-auto sm:min-w-[180px] ml-auto py-3.5 px-8 rounded-2xl bg-duoGreen border-b-4 border-duoGreen-dark text-white font-black text-base uppercase tracking-wide shadow-md';
+            } else {
+                playChime('wrong');
+                currentLesson.combo = 0;
+                appState.hearts = Math.max(0, appState.hearts - 1);
+
+                // Record in Mistakes Bank
+                if (!appState.mistakes.includes(q.id)) {
+                    appState.mistakes.push(q.id);
+                }
+                saveState();
+                document.getElementById('lesson-hearts-count').textContent = appState.hearts;
+
+                footer.className = 'border-t-2 border-duoRed bg-duoRed-light px-4 sm:px-6 py-4 sm:py-6 transition-colors duration-200';
+                iconBox.innerHTML = '<i class="fa-solid fa-xmark text-duoRed"></i>';
+                heading.className = 'font-black text-lg text-duoRed-dark';
+                heading.textContent = t.wrongTitle;
+                detail.className = 'text-sm font-black text-duoRed-dark mt-0.5 font-tc';
+                detail.textContent = correctText;
+
+                actionBtn.textContent = t.btnContinue;
+                actionBtn.className = 'btn-3d w-full sm:w-auto sm:min-w-[180px] ml-auto py-3.5 px-8 rounded-2xl bg-duoRed border-b-4 border-duoRed-dark text-white font-black text-base uppercase tracking-wide shadow-md';
+            }
+        }
+
+        function advanceLessonStep() {
+            const t = I18N[appState.lang];
+            if (appState.hearts <= 0 && !currentLesson.isMistakeDrill) {
+                exitLesson();
+                showToast(t.noHeartsToast);
+                return;
+            }
+
+            currentLesson.index += 1;
+            if (currentLesson.index < currentLesson.questions.length) {
+                renderCurrentQuestion();
+            } else {
+                completeLesson();
+            }
+        }
+
+        function completeLesson() {
+            const t = I18N[appState.lang];
+            const accuracy = Math.round((currentLesson.correctCount / currentLesson.questions.length) * 100);
+            const earnedXp = currentLesson.isMistakeDrill ? 15 : 20;
+            const earnedGems = currentLesson.isMistakeDrill ? 10 : 15;
+
+            appState.xpToday += earnedXp;
+            appState.gems += earnedGems;
+
+            if (currentLesson.isMistakeDrill) {
+                appState.hearts = Math.min(5, appState.hearts + 1);
+            } else if (!appState.completedNodes.includes(currentLesson.nodeId)) {
+                appState.completedNodes.push(currentLesson.nodeId);
+            }
+            saveState();
+
+            document.getElementById('lesson-stage').classList.add('hidden');
+            document.getElementById('complete-title').textContent = t.completeTitle;
+            document.getElementById('complete-sub').textContent = t.completeSub;
+            document.getElementById('reward-xp').textContent = `+${earnedXp} XP`;
+            document.getElementById('reward-acc-label').textContent = t.rewardAccLabel;
+            document.getElementById('reward-acc').textContent = `${accuracy}%`;
+            document.getElementById('reward-gems-label').textContent = t.rewardGemsLabel;
+            document.getElementById('reward-gems').textContent = `+${earnedGems} 💎`;
+            document.getElementById('complete-continue-btn').textContent = t.btnContinue;
+
+            document.getElementById('lesson-complete-modal').classList.remove('hidden');
+            playChime('correct');
+        }
+
+        function closeCompleteModal() {
+            document.getElementById('lesson-complete-modal').classList.add('hidden');
+            currentLesson = null;
+            renderLearningPath();
+            renderMistakesView();
+        }
+
+        // ---------------------------------------------------------------------
+        // 9. RENDER PINYIN LAB, AI TUTOR & MISTAKES VIEWS
+        // ---------------------------------------------------------------------
+        function renderPinyinLab() {
+            const lang = appState.lang;
+            document.getElementById('pinyin-tones-grid').innerHTML = PINYIN_TONES.map(item => `
+                <div class="bg-white border-2 border-slate-200 hover:border-duoBlue rounded-3xl p-4 flex flex-col justify-between shadow-sm transition-all">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="px-2.5 py-0.5 rounded-full bg-duoBlue-light text-duoBlue-dark font-black text-xs">${item.pitch}</span>
+                            <div class="flex gap-1.5">
+                                <button onclick="speakTaiwan('${item.tc}', 0.95)" class="w-8 h-8 rounded-xl bg-duoBlue text-white flex items-center justify-center text-xs shadow-sm" title="Normal">
+                                    <i class="fa-solid fa-volume-high"></i>
+                                </button>
+                                <button onclick="speakTaiwan('${item.tc}', 0.65)" class="w-8 h-8 rounded-xl bg-duoBlue-light text-duoBlue-dark flex items-center justify-center text-xs" title="Slow 0.65x">
+                                    <i class="fa-solid fa-turtle"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 rounded-2xl p-2 mb-3 border border-slate-100">
+                            <svg viewBox="0 0 100 100" class="w-full h-14 stroke-duoBlue fill-none" stroke-width="7" stroke-linecap="round">
+                                <line x1="5" y1="22" x2="95" y2="22" stroke="#e2e8f0" stroke-width="1.5" stroke-dasharray="3 3" />
+                                <line x1="5" y1="52" x2="95" y2="52" stroke="#e2e8f0" stroke-width="1.5" stroke-dasharray="3 3" />
+                                <line x1="5" y1="80" x2="95" y2="80" stroke="#e2e8f0" stroke-width="1.5" stroke-dasharray="3 3" />
+                                <path d="${item.path}" />
+                            </svg>
+                        </div>
+                        <div class="text-center mb-2">
+                            <span class="font-tc font-black text-3xl text-slate-900 mr-1">${item.tc}</span>
+                            <span class="text-lg font-black text-duoOrange">${item.py}</span>
+                            <div class="text-xs font-bold text-slate-500">(${item.meaning[lang]})</div>
+                        </div>
+                    </div>
+                    <div class="text-center pt-2 border-t border-slate-100 text-xs font-extrabold text-slate-700">
+                        ${item.name[lang]}
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('pinyin-syllables-grid').innerHTML = PINYIN_SYLLABLES.map(s => `
+                <div class="bg-white border-2 border-slate-200 rounded-2xl p-3 flex flex-col items-center justify-between gap-2 shadow-sm">
+                    <div class="text-center">
+                        <div class="text-lg font-black text-duoBlue-dark">${s.py}</div>
+                        <div class="font-tc font-bold text-sm text-slate-500">${s.tc}</div>
+                    </div>
+                    <div class="flex gap-1.5 w-full">
+                        <button onclick="speakTaiwan('${s.tc}', 0.95)" class="flex-1 py-1.5 rounded-xl bg-duoBlue text-white text-xs hover:brightness-105">
+                            <i class="fa-solid fa-volume-high"></i>
+                        </button>
+                        <button onclick="speakTaiwan('${s.tc}', 0.65)" class="flex-1 py-1.5 rounded-xl bg-duoBlue-light text-duoBlue-dark text-xs hover:bg-duoBlue/20">
+                            <i class="fa-solid fa-turtle"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        let activeTutorTopicId = 't_tones';
+
+        function renderAITutor(topicId) {
+            activeTutorTopicId = topicId;
+            const lang = appState.lang;
+
+            document.getElementById('tutor-topic-buttons').innerHTML = AI_TUTOR_TOPICS.map(topic => {
+                const active = topic.id === topicId;
+                return `
+                    <button onclick="renderAITutor('${topic.id}')" class="btn-3d px-4 py-2.5 rounded-2xl border-2 border-b-4 text-xs sm:text-sm font-extrabold transition-all ${
+                        active 
+                        ? 'bg-duoPurple border-duoPurple-dark text-white shadow-sm' 
+                        : 'bg-white border-slate-200 text-slate-700 hover:border-duoPurple'
+                    }">
+                        ${topic.label[lang]}
+                    </button>
+                `;
+            }).join('');
+
+            const topic = AI_TUTOR_TOPICS.find(t => t.id === topicId) || AI_TUTOR_TOPICS[0];
+            document.getElementById('tutor-response-card').innerHTML = `
+                <div class="flex items-center gap-3 pb-3 border-b border-slate-100">
+                    <div class="w-10 h-10 rounded-xl bg-duoPurple-light text-duoPurple-dark flex items-center justify-center font-black">
+                        AI
+                    </div>
+                    <h4 class="font-black text-base sm:text-lg text-slate-900">${topic.label[lang]}</h4>
+                </div>
+                <p class="text-sm sm:text-base font-bold text-slate-700 leading-relaxed">
+                    ${topic.answer[lang]}
+                </p>
+                <div class="pt-2">
+                    <div class="text-xs font-black uppercase text-slate-400 mb-2">Interactive Audio Examples:</div>
+                    <div class="flex flex-wrap gap-2.5">
+                        ${topic.demoWords.map(w => `
+                            <button onclick="speakTaiwan('${w.tc}', 0.9)" class="btn-3d px-4 py-2.5 rounded-2xl bg-slate-50 border-2 border-b-4 border-slate-200 hover:border-duoBlue flex items-center gap-2.5">
+                                <span class="font-tc font-black text-lg text-slate-900">${w.tc}</span>
+                                <span class="text-xs font-extrabold text-duoBlue">${w.py}</span>
+                                <i class="fa-solid fa-volume-high text-duoBlue text-xs"></i>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderMistakesView() {
+            const lang = appState.lang;
+            const t = I18N[lang];
+            const container = document.getElementById('mistakes-list-container');
+            const drillBtn = document.getElementById('start-mistake-drill-btn');
+
+            if (appState.mistakes.length === 0) {
+                drillBtn.disabled = true;
+                drillBtn.classList.add('opacity-50');
+                container.innerHTML = `
+                    <div class="bg-duoGreen-light/40 border-2 border-duoGreen/40 rounded-3xl p-8 text-center space-y-3">
+                        <div class="text-4xl">🌟</div>
+                        <p class="font-extrabold text-slate-700 text-sm sm:text-base">${t.noMistakesText}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            drillBtn.disabled = false;
+            drillBtn.classList.remove('opacity-50');
+
+            const allQuestions = CURRICULUM_UNITS.flatMap(u => u.nodes.flatMap(n => n.questions));
+            const missedObjs = allQuestions.filter(q => appState.mistakes.includes(q.id));
+
+            container.innerHTML = missedObjs.map(q => {
+                const headline = q.audioText || q.targetTc || q.displayTc || q.pairs[0].tc;
+                return `
+                    <div class="bg-white border-2 border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-4 shadow-sm">
+                        <div>
+                            <div class="font-tc font-black text-xl text-slate-900">${headline}</div>
+                            <p class="text-xs font-bold text-slate-500 mt-1">${q.aiTip[lang]}</p>
+                        </div>
+                        <button onclick="speakTaiwan('${headline}', 0.85)" class="w-11 h-11 rounded-2xl bg-duoBlue-light text-duoBlue-dark hover:bg-duoBlue hover:text-white flex items-center justify-center shrink-0 transition-colors">
+                            <i class="fa-solid fa-volume-high"></i>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ---------------------------------------------------------------------
+        // 10. INITIALIZATION
+        // ---------------------------------------------------------------------
+        window.addEventListener('DOMContentLoaded', () => {
+            updateHUD();
+            setLanguage(appState.lang);
+            switchMainView('learn');
+            if (!appState.onboarded) {
+                openOnboarding();
+            }
+        });
+    </script>
+</body>
+</html>
